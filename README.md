@@ -1,1 +1,1 @@
-# cs3240-f16-team11
+# Django Project for CS 3240
