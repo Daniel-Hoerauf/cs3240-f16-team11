@@ -1,4 +1,4 @@
-# Djjjango Project for CS 3240:
+# Django Project for CS 3240:
 ### Team 11
 ### Colvin Miklovic
 ### Daniel Hoerauf
