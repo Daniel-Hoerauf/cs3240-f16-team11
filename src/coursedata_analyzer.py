@@ -22,6 +22,7 @@ def instructor_numbers(dept_id):
 
 
 def main():
+    print('testing')
     print(instructor_numbers('APMA'))
 
 
