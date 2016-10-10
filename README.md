@@ -1,1 +1,1 @@
-# Django Project for CS 3240
+# Djjjango Project for CS 3240
