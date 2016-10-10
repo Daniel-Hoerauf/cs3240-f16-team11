@@ -27,6 +27,7 @@ def load_course_database(db_name, csv_filename):
 
 def main():
     load_course_database(PG_DATABASE, 'seas-courses-5years.csv')
+    print("Loaded courses")
 
 
 if __name__ == '__main__':
