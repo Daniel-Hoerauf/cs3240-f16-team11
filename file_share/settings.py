@@ -82,12 +82,12 @@ WSGI_APPLICATION = 'file_share.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'db_name',                      
-        'USER': 'db_user',
-        'PASSWORD': 'db_user_password',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'file_share',
+        'USER': 'postgres',
+        'PASSWORD': 'wombat1',
         'HOST': '',
-        'PORT': 'db_port_number',
+        'PORT': '5432',
     }
 }
 
