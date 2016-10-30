@@ -1,4 +1,8 @@
 <h2>Register</h2>
+{% for message in messages %}
+  <p>{{ message }}</p>
+{% endfor %}
+
 <form method="post" action="/create_account/">
   {% csrf_token %}
   <p>
