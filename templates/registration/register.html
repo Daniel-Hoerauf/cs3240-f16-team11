@@ -1,0 +1,21 @@
+<h2>Register</h2>
+{% for message in messages %}
+  <p>{{ message }}</p>
+{% endfor %}
+
+<form method="post" action="/create_account/">
+  {% csrf_token %}
+  <p>
+    <label for="id_username">Username:</label>
+    <input id="id_username" maxlength="254" name="username" type="text" required>
+  </p>
+  <p>
+    <label for="id_email">Email:</label>
+    <input id="id_email" maxlength="254" name="email" type="email" required>
+  </p>
+  <p>
+    <label for="id_password">Password:</label>
+    <input id="id_password" maxlength="254" name="password" type="password" required>
+  </p>
+  <button type="submit">Register</button>
+</form>

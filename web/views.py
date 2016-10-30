@@ -1,5 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.messages import error
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+<<<<<<< HEAD
 from django.shortcuts import render, redirect
 from django.contrib.messages import error
 from django.contrib.auth import login, authenticate
