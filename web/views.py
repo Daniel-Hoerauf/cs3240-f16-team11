@@ -3,7 +3,6 @@ from django.contrib.messages import error
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-<<<<<<< HEAD
 from django.shortcuts import render, redirect
 from django.contrib.messages import error
 from django.contrib.auth import login, authenticate
@@ -11,9 +10,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.views.decorators.http import require_http_methods
-
-
-from django.shortcuts import render
 from .forms import ReportForm
 from django.db import models as m
 
