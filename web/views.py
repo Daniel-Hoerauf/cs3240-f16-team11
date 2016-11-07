@@ -10,7 +10,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.views.decorators.http import require_http_methods
-from .forms import ReportForm
 from django.db import models as m
 
 @login_required
@@ -37,18 +36,3 @@ def create_account(request):
     login(request, user)
     return redirect('/')
 
-def report_form_upload(request):
-    form = ReportForm(request.REPORT)
-    title = form.cleaned_data['title']
-    timestamp = form.cleaned_data['timestamp']
-    short_desc = form.cleaned_data['short_desc']
-    long_desc = form.cleaned_data['long_desc']
-    files = form.cleaned_data['files']
-    private = form.cleaned_data['private']
-    username = form.cleaned_data['username']
-    report = m.Report.objects.create(title=title, timestamp=timestamp, short_desc=short_desc, long_desc=long_desc,
-                                     files = files, private = private, username = username)
-
-    return render(request, 'report/form.html', {
-        'form': form,
-    })
