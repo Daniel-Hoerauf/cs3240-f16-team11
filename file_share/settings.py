@@ -46,6 +46,7 @@ INSTALLED_APPS = (
     'web',
     'bootstrap3',
     'jquery',
+    'turbogears',
 )
 
 MIDDLEWARE_CLASSES = (
