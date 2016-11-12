@@ -1,0 +1,12 @@
+<h1>Groups for {{ user.username }}</h1>
+
+<ul>
+  {% for group in groups %}
+  <li><a href='/group/?name={{ group|escape }}'>{{ group }}</a></li>
+  {% endfor %}
+  <form action="/create_group/" method="post" name="create">
+    {% csrf_token %}
+    <input type='text' name='groupname'>
+    <input type='submit' value='Submit'>
+  </form>
+</ul>
