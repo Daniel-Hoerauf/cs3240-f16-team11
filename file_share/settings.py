@@ -45,8 +45,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'web',
     'bootstrap3',
-    'jquery',
-    'turbogears',
 )
 
 MIDDLEWARE_CLASSES = (
