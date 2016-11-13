@@ -1,0 +1,13 @@
+<h1> Members of {{ group_name}} </h1>
+
+<ul>
+  {% for member in group_members %}
+  <li><a href='/user/?name={{ member|escape }}'>{{ member }}</a></li>
+  {% endfor %}
+  <form action="/add_member/" method="post" name="add">
+    {% csrf_token %}
+    <input type='hidden' name='groupname' value='{{ group_name }}'>
+    <input type='text' name='username'>
+    <input type='submit' value='Submit'>
+   </form>
+</ul>
