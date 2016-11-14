@@ -5,15 +5,16 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.views.decorators.http import require_http_methods
+from .forms import registration_form
 
 @login_required
 def home(request):
     return render(request, 'web/home.html', {})
 
-
 @require_http_methods(['GET'])
 def register_page(request, errors=None):
-    return render(request, 'registration/register.html', {})
+    form = registration_form
+    return render(request, 'registration/register.html', {'form': form})
 
 @require_http_methods(['POST'])
 def create_account(request):

@@ -1,48 +1,20 @@
-<!DOCTYPE html>
-<head>
-    <title>Secure File Share</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+{% extends 'registration/base.html' %}
+{% load bootstrap3 %}
 
-    {% load bootstrap3 %}
-    {% bootstrap_css %}
-    {% bootstrap_javascript %}
-</head>
-
-<body>
-    {# Navigation Menu #}
-    <header>
-        <div class="navbar navbar-default navbar-static-top {% block nav-style %}{% endblock %}">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="/">Secure File Share</a>
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav navbar-right">
-                    {% if user.is_authenticated %}
-                        <li><a href="">Logout</a></li>
-                    {% else %}
-                        <li><a href="/login">Login</a></li>
-                        <li><a href="/register">Sign Up</a></li>
-                    {% endif %}
-                </ul>
-            </div>
+{% block content %}
+     <div class="container">
+        <div class="col-lg-4 col-md-4 col-xs-4"></div>
+        <div class="container col-lg-4 col-md-4 col-xs-4" style="border: 2px solid black; border-radius: 25px; background-color: white;">
+            <h2>User Login</h2>
+            {# login form #}
+            <form action="/login/" method="post" class="form">
+                  {% csrf_token %}
+                  {% bootstrap_form form %}
+                  {% buttons %}
+                    <button type="submit" class="btn btn-primary">Login</button>
+                  {% endbuttons %}
+                  <a href='/register'>Not already registered?</a>
+            </form>
         </div>
-    </header>
-
-    {# login form #}
-    <h2>Login</h2>
-    <form action="/" method="post" class="form">
-      {% csrf_token %}
-      {% bootstrap_form form %}
-      {% buttons %}
-        <button type="submit" class="btn btn-primary">Submit</button>
-      {% endbuttons %}
-      <a href='/register'>Not already registered?</a>
-    </form>
-</body>
+     </div>
+{% endblock %}

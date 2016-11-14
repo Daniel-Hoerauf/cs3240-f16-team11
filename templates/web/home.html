@@ -1,3 +1,6 @@
-<h1>Hello {{ user.username }}</h1>
+{% extends 'web/base.html' %}
+{% load bootstrap3 %}
 
-<a href="/logout/">Logout</a>
+{% block content %}
+    <h1>Hello {{ user.username }}</h1>
+{% endblock %}

@@ -1,67 +1,21 @@
-<!DOCTYPE html>
-<head>
-    <title>Secure File Share</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+{% extends 'registration/base.html' %}
+{% load bootstrap3 %}
 
-    {% load bootstrap3 %}
-    {% bootstrap_css %}
-    {% bootstrap_javascript %}
-</head>
-
-<body>
-    {# Navigation Menu #}
-    <header>
-        <div class="navbar navbar-default navbar-static-top {% block nav-style %}{% endblock %}">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="/">Secure File Share</a>
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav navbar-right">
-                    {% if user.is_authenticated %}
-                        <li><a href="">Logout</a></li>
-                    {% else %}
-                        <li><a href="/login">Login</a></li>
-                        <li><a href="/register">Sign Up</a></li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </header>
-
-    <h2>Register</h2>
-    {% for message in messages %}
-      <p>{{ message }}</p>
-    {% endfor %}
-
-    {% block body_block %}
-    <form method="post" action="/create_account/" class="form">
-      {% csrf_token %}
-{#      {% for field in form %}#}
-{#        {% bootstrap_field field %}#}
-{#      {% endfor %}#}
-{#      {% bootstrap_form form.as_p %}#}
-      <p>
-        <label for="id_username">Username:</label>
-        <input id="id_username" maxlength="254" name="username" type="text" required>
-      </p>
-      <p>
-        <label for="id_email">Email:</label>
-        <input id="id_email" maxlength="254" name="email" type="email" required>
-      </p>
-      <p>
-        <label for="id_password">Password:</label>
-        <input id="id_password" maxlength="254" name="password" type="password" required>
-      </p>
-       {% buttons %}
+{% block content %}
+    <div class="col-lg-4 col-md-4 col-xs-4"></div>
+    <div class="container col-lg-4 col-md-4 col-xs-4" style="border: 2px solid black; border-radius: 25px; background-color: white;">
+       <h2>Register</h2>
+       {% for message in messages %}
+         <p>{{ message }}</p>
+       {% endfor %}
+      <form action="/create_account/" method="post" class="form">
+          {% csrf_token %}
+          {% for field in form %}
+            {% bootstrap_field field %}
+          {% endfor %}
+        {% buttons %}
             <button type="submit" class="btn btn-primary">Submit</button>
-       {% endbuttons %}
-    </form>
-    {% endblock %}
-</body>
+        {% endbuttons %}
+      </form>
+    </div>
+{% endblock %}
