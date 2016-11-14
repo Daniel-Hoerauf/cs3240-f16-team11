@@ -61,7 +61,8 @@ def group(request):
     group = UserGroup.objects.get(name=group_name)
     members = []
     for member in group.members.all():
-        members.append(member)
+        if member != request.user:
+            members.append(member)
     return render(request, 'web/group.html', {'group_name': group_name,
                                               'group_members': members})
     return HttpResponse(status=200)
