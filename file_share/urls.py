@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^logout/$', auth_views.logout, {'next_page': '/'}, name='logout'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'', include('web.urls')),
+    url(r'^reports/', include('reports.urls')),
 
 
 
