@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,7 +25,7 @@ SECRET_KEY = 'sl8k)d(=(6titjo=w)kyz4@d$_58(w)=z3p+vvhn^hf8ap@zt&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['file_share']
 
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login/'
@@ -91,6 +91,7 @@ DATABASES = {
     }
 }
 
+
 if os.environ.get('DATABASE_URL'):
     import dj_database_url
     db_from_env = dj_database_url.config(conn_max_age=500)
@@ -122,3 +123,4 @@ USE_TZ = True
 # )
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+SECURE_PROXY_SSL_HEADER = (‘HTTP_X_FORWARDED_PROTO’, ‘https’)
