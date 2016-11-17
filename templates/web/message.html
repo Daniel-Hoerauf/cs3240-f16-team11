@@ -1,0 +1,13 @@
+{% load bootstrap3 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+<div class="container">
+<h1>Send Message</h1>
+<form method="post" class="form" action="/message/{{ recipient|escape }}/">
+  {% csrf_token %}
+  {% bootstrap_form form %}
+  {% buttons %}
+    <button type="submit" class="btn btn-primary">Send</button>
+  {% endbuttons %}
+</form>
+</div>

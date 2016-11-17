@@ -8,6 +8,7 @@ from django.db import IntegrityError
 from django.views.decorators.http import require_http_methods
 from urllib.parse import quote
 from .models import UserGroup
+from .forms import MessageForm
 
 
 @login_required
@@ -77,3 +78,28 @@ def add_member(request):
     user = User.objects.get(username=user_name)
     group.members.add(user)
     return redirect('/group/?name={}'.format(quote(group_name)))
+
+
+@require_http_methods(['GET'])
+@login_required
+def message_form(request):
+    recipient = request.GET['user']
+    form = MessageForm()
+    return render(request, 'web/message.html', {'form': form,
+                                                'recipient': recipient})
+
+
+@require_http_methods(['POST'])
+@login_required
+def send_message(request, user):
+    form = MessageForm(request.POST)
+    if form.is_valid():
+        message = form.save(commit=False)
+        message.read = False
+        message.sender = User.objects.get(username=request.user.username)
+        message.recipient = User.objects.get(username=user)
+        message.save()
+        print(user)
+    else:
+        return redirect('message/post/?user={}'.format(user))
+    return HttpResponse(status=200)

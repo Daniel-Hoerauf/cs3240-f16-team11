@@ -9,4 +9,6 @@ urlpatterns = [
     url(r'^create_group/$', views.create_group, name='create_group'),
     url(r'^group/$', views.group, name='group'),
     url(r'^add_member/$', views.add_member, name='add_member'),
+    url(r'^message/post/$', views.message_form, name='message'),
+    url(r'^message/(?P<user>[-\w]+)/$', views.send_message, name='send_mess'),
 ]
