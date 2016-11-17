@@ -7,6 +7,8 @@ from .forms import ReportForm
 
 def index(request):
     return render(request, 'createReport.html')
+def thanks(request):
+    return render(request, 'form.html')
 
 def create(request):
 
@@ -30,14 +32,9 @@ def add_report(request):
 
 
         # redirect to a new URL:
-            #return index(request)
-            #return render(request, 'createReport.html')
             return render(request, 'createReport.html', {'form': form_class})
-            #return HttpResponse('Thank you for submitting a report!')
         else:
             text = form.errors
-            #print(form.errors)
-            #return render(request, 'createReport.html', {'form': form_class})
             return HttpResponse(text)
 
     else:
