@@ -1,12 +1,11 @@
-from django.db import models as m
+from django.db import models
+from django.contrib.auth.models import User as Users
 
 # Create your models here.
-# class Report(m.Model):
-#     def __init__(self):
-#         self.title = m.CharField(max_length = 256)
-#         self.timestamp = m.TimeField()
-#         self.short_desc = m.CharField(max_length = 256)
-#         self.long_desc = m.CharField(max_length = 256)
-#         self.files = m.CharField(max_length = 256)
-#         self.private = m.BooleanField(max_length = 256)
-#         self.username = m.CharField(max_length = 256)
+
+class UserGroup(models.Model):
+    name = models.CharField(max_length=100, primary_key=True, default='GROUP')
+    members = models.ManyToManyField(Users)
+
+    def __str__(self):
+        return self.name

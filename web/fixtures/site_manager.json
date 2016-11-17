@@ -1,0 +1,51 @@
+[
+{
+    "fields": {
+        "permissions": [
+            7,
+            12
+        ],
+        "name": "Users"
+    },
+    "model": "auth.group",
+    "pk": 1
+},
+{
+    "fields": {
+        "permissions": [
+            7,
+            8,
+            9,
+            4,
+            5,
+            6,
+            10,
+            11
+        ],
+        "name": "Site Managers"
+    },
+    "model": "auth.group",
+    "pk": 2
+},
+{
+    "fields": {
+        "user_permissions": [],
+        "is_superuser": false,
+        "password": "pbkdf2_sha256$20000$ixUx2ilE1lZo$z9JrTzmyAySRcs0QHeeO8rkqrreViSnk5ZMS8hEqPcc=",
+        "is_active": true,
+        "email": "example@temp.com",
+        "groups": [
+            1,
+            2
+        ],
+        "last_login": "2016-11-02T21:07:12Z",
+        "first_name": "",
+        "last_name": "",
+        "date_joined": "2016-11-02T20:51:11Z",
+        "is_staff": false,
+        "username": "Manager"
+    },
+    "model": "auth.user",
+    "pk": 1
+}
+]
