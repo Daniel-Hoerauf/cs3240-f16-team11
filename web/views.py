@@ -2,13 +2,17 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.messages import error
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.views.decorators.http import require_http_methods
 from urllib.parse import quote
 from .models import UserGroup
+from django import template
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib import messages
 
+register = template.Library()
 
 @login_required
 def home(request):
@@ -76,3 +80,27 @@ def add_member(request):
     user = User.objects.get(username=user_name)
     group.members.add(user)
     return redirect('/group/?name={}'.format(quote(group_name)))
+
+@require_http_methods(['GET'])
+@login_required
+def site_manager(request):
+    return render(request, 'web/site_manager.html', {})
+
+@require_http_methods(['POST'])
+@login_required
+def give_SM_status(request):
+    user_name = request.POST.get('username')
+    try:
+        user = User.objects.get(username=user_name)
+        group = Group.objects.get(name='Site Managers')
+        if Group.objects.filter(user=user).exists():
+            messages.add_message(request, messages.ERROR, 'User is already a site manager.')
+            return redirect('/site_manager/')
+        else:
+            group.user_set.add(user)
+            messages.add_message(request, messages.SUCCESS, 'User is now a site manager.')
+            return redirect('/site_manager/')
+            return HttpResponse(status=201)
+    except ObjectDoesNotExist:
+        messages.add_message(request, messages.ERROR, 'User does not exist.')
+        return redirect('/site_manager/')
