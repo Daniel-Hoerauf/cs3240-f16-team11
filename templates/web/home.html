@@ -2,4 +2,11 @@
 
 <h4><a href='/groups/'>Groups</a></h4>
 
+<div>
+    {%  load web_filters %}
+    {% if user|is_site_manager %}
+        <a href='/site_manager/'>Site Manager Permissions</a>
+    {%  endif %}
+</div>
+
 <a href="/logout/">Logout</a>

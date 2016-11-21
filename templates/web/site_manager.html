@@ -1,0 +1,19 @@
+<h1>Site Manager Permissions</h1>
+
+<form action="/give_SM_status/" method="post" name="choose_user">
+    {% csrf_token %}
+    <input type='text' name='username'>
+    <input type='submit' value='Submit'>
+</form>
+
+{% if messages %}
+    <div>
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message|safe }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<a href="/home/">Home</a>
