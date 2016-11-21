@@ -1,7 +1,7 @@
 from django import forms
 from .models import Report
 
-class ReportForm(forms.Form):
+class ReportForm(forms.ModelForm):
 
     title = forms.CharField(max_length=256)
     timestamp = forms.TimeField()
@@ -11,6 +11,6 @@ class ReportForm(forms.Form):
     private = forms.BooleanField()
     username = forms.CharField(max_length = 256)
 
-    class Report:
+    class Meta:
         model = Report
-        fields = ('title', 'timestamp', 'short_desc', 'long_desc', 'files', 'private', 'username')
+        fields = ('title', 'timestamp', 'short_desc', 'long_desc', 'files', 'private', 'username',)

@@ -23,16 +23,16 @@ def add_report(request):
         # check whether it's valid:
         if form.is_valid():
             # process the data in form.cleaned_data as required
-            r = Report()
+            r = ReportForm()
             r.title = form.cleaned_data['title']
             r.short_desc = form.cleaned_data['short_desc']
             r.long_desc = form.cleaned_data['long_desc']
             r.username = form.cleaned_data['username']
-            form.save(commit = True)
-
-
-        # redirect to a new URL:
+            r.save(commit=True)
+			
+		# redirect to a new URL:
             return render(request, 'createReport.html', {'form': form_class})
+			
         else:
             text = form.errors
             return HttpResponse(text)
