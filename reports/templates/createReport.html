@@ -6,7 +6,7 @@
 </head>
 <body>
     <h1>Add A New Report</h1>
-    <form action='/reports/thanks/' method='post'>
+    <form action='/reports/' method='post'>
         {% csrf_token %}
         {{ form.as_p }}
         <!--<input type='submit' value='Submit' />-->
