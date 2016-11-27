@@ -7,13 +7,15 @@ from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.views.decorators.http import require_http_methods
 from urllib.parse import quote
-from .models import UserGroup
+from .models import UserGroup, Message
 from .forms import MessageForm
 
 
 @login_required
 def home(request):
-    return render(request, 'web/home.html', {})
+    user = User.objects.get(username=request.user.username)
+    unread = Message.objects.filter(recipient=user).filter(read=False)
+    return render(request, 'web/home.html', {'unread': len(unread)})
 
 
 @require_http_methods(['GET'])
@@ -99,7 +101,32 @@ def send_message(request, user):
         message.sender = User.objects.get(username=request.user.username)
         message.recipient = User.objects.get(username=user)
         message.save()
-        print(user)
     else:
         return redirect('message/post/?user={}'.format(user))
     return HttpResponse(status=200)
+
+
+@require_http_methods(['GET'])
+@login_required
+def all_messages(request):
+    user = User.objects.get(username=request.user.username)
+    messages = user.message_to.all()
+    return render(request, 'web/messages.html', {'messages': messages})
+
+
+@require_http_methods(['GET', 'POST'])
+@login_required
+def message_page(request, pk):
+    message = Message.objects.get(pk=pk)
+    if request.method == 'POST':
+        if request.POST.get('read', False):
+            message.read = False
+            message.save()
+            return redirect('/messages/')
+        elif request.POST.get('delete', False):
+            return redirect('/messages/')
+        else:
+            return HttpResponse(status=400)
+    message.read = True
+    message.save()
+    return render(request, 'web/view_message.html', {'message': message})
