@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.messages import error
 from django.contrib.auth import login, authenticate
@@ -117,13 +117,14 @@ def all_messages(request):
 @require_http_methods(['GET', 'POST'])
 @login_required
 def message_page(request, pk):
-    message = Message.objects.get(pk=pk)
+    message = get_object_or_404(Message, pk=pk)
     if request.method == 'POST':
         if request.POST.get('read', False):
             message.read = False
             message.save()
             return redirect('/messages/')
         elif request.POST.get('delete', False):
+            message.delete()
             return redirect('/messages/')
         else:
             return HttpResponse(status=400)
