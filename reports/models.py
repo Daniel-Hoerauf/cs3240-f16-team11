@@ -12,4 +12,9 @@ class Report(models.Model):
     def __str__(self):
         return self.title
 
+class Folder(models.Model):
+    name = models.CharField(max_length=32)
+    def __str__(self):
+        return self.name
+
 

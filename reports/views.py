@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from .models import Report
 from django.template import loader
 from .forms import ReportForm
+from django.template import RequestContext
 # Create your views here.
 
 def index(request):
@@ -43,3 +44,10 @@ def add_report(request):
         form = ReportForm()
     #return render(request, 'createReport.html', {'form': form_class})
     return render(request, 'createReport.html', {'form': form_class})
+
+def see_reports(request):
+    template = loader.get_template('see_reports.html')
+    reports_list = Report.objects.all()
+    output = ', '.join([r.title for r in reports_list])
+    context = RequestContext(request, {'reports_list': reports_list})
+    return HttpResponse(template.render(context))

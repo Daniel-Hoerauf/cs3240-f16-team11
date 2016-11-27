@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Reports</title>
+</head>
+<body>
+    {% if reports_list %}
+            <UL>
+            {% for report in reports_list %}
+                    <LI><b>{{ report.title }}</b></LI>
+                    <LI>{{ report.username }}</LI>
+                    <LI>{{ report.short_desc }}</LI>
+                    <LI>{{ report.long_desc }}</LI>
+                    <LI>{{ report.files }}</LI>
+                    <LI>{{ report.timestamp }}</LI>
+                    <p></p>
+            {% endfor %}
+            </UL>
+    {% else %}
+            <P>No reports at present.</P>
+    {% endif %}
+</body>
+</html>
