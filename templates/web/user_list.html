@@ -1,0 +1,5 @@
+<ul>
+  {% for user in user_list %}
+    <li><a href='/user/{{ user.username|escape }}/'>{{ user.username }}</a></li> 
+  {% endfor %}
+</ul>

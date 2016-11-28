@@ -99,11 +99,11 @@ def send_message(request, user):
         message = form.save(commit=False)
         message.read = False
         message.sender = User.objects.get(username=request.user.username)
-        message.recipient = User.objects.get(username=user)
+        message.recipient = get_object_or_404(User, username=user)
         message.save()
     else:
         return redirect('message/post/?user={}'.format(user))
-    return HttpResponse(status=200)
+    return redirect('/users')
 
 
 @require_http_methods(['GET'])
@@ -114,7 +114,6 @@ def all_messages(request):
     return render(request, 'web/messages.html', {'messages': messages})
 
 
-@require_http_methods(['GET', 'POST'])
 @login_required
 def message_page(request, pk):
     message = get_object_or_404(Message, pk=pk)
@@ -131,3 +130,28 @@ def message_page(request, pk):
     message.read = True
     message.save()
     return render(request, 'web/view_message.html', {'message': message})
+
+
+@require_http_methods(['GET'])
+@login_required
+def find_users(request):
+    query = request.GET.get('username', '')
+    users = User.objects.all().filter(username__icontains=query).exclude(
+        username=request.user.username)
+    curr_user = User.objects.get(username=request.user.username)
+    if curr_user in users:
+        users.remove(curr_user)
+    return render(request, 'web/user_list.html', {'user_list': users})
+
+    return HttpResponse(status=200)
+
+
+@require_http_methods(['GET'])
+@login_required
+def view_user(request, user):
+    if user is None:
+        return HttpResponse(status=404)
+    # Make sure user exists
+    get_object_or_404(User, username=user)
+    return render(request, 'web/user.html', {'user': user})
+    return HttpResponse(status=200)
