@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 from . import views
 
 urlpatterns = [
@@ -6,6 +6,7 @@ urlpatterns = [
     url(r'^register/$', views.register_page, name='register_page'),
     url(r'^create_account/$', views.create_account, name='create_account'),
     url(r'^home/$', views.home, name='home'),
+    url(r'^reports/', include('reports.urls')),
     url(r'^groups/$', views.groups, name='groups'),
     url(r'^create_group/$', views.create_group, name='create_group'),
     url(r'^group/$', views.group, name='group'),

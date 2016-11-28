@@ -4,20 +4,24 @@ from django.contrib.messages import error
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib.messages import error
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.views.decorators.http import require_http_methods
+from django.db import models as m
 from urllib.parse import quote
 from .models import UserGroup
 from django import template
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 
-register = template.Library()
 
 @login_required
 def home(request):
     return render(request, 'web/home.html', {})
-
 
 @require_http_methods(['GET'])
 def register_page(request, errors=None):
