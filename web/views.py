@@ -2,13 +2,22 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.messages import error
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib.messages import error
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.views.decorators.http import require_http_methods
+from django.db import models as m
 from urllib.parse import quote
 from .models import UserGroup, Message
 from .forms import MessageForm
+from django import template
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib import messages
 
 
 @login_required
@@ -21,6 +30,7 @@ def home(request):
 @require_http_methods(['GET'])
 def register_page(request, errors=None):
     return render(request, 'registration/register.html', {})
+
 
 @require_http_methods(['POST'])
 def create_account(request):
@@ -155,3 +165,29 @@ def view_user(request, user):
     get_object_or_404(User, username=user)
     return render(request, 'web/user.html', {'user': user})
     return HttpResponse(status=200)
+
+
+@require_http_methods(['GET'])
+@login_required
+def site_manager(request):
+    return render(request, 'web/site_manager.html', {})
+
+
+@require_http_methods(['POST'])
+@login_required
+def give_SM_status(request):
+    user_name = request.POST.get('username')
+    try:
+        user = User.objects.get(username=user_name)
+        group = Group.objects.get(name='Site Managers')
+        if Group.objects.filter(user=user).exists():
+            messages.add_message(request, messages.ERROR, 'User is already a site manager.')
+            return redirect('/site_manager/')
+        else:
+            group.user_set.add(user)
+            messages.add_message(request, messages.SUCCESS, 'User is now a site manager.')
+            return redirect('/site_manager/')
+            return HttpResponse(status=201)
+    except ObjectDoesNotExist:
+        messages.add_message(request, messages.ERROR, 'User does not exist.')
+        return redirect('/site_manager/')
