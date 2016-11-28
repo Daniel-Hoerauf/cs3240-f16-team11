@@ -14,7 +14,8 @@
                     <LI>{{ report.long_desc }}</LI>
                     <LI>{{ report.files }}</LI>
                     <LI>{{ report.timestamp }}</LI>
-                    <p></p>
+                    <button type="button" onclick="alert('Report Saved to Your Folder')">Save Report</button>
+		    <p></p>
             {% endfor %}
             </UL>
     {% else %}
