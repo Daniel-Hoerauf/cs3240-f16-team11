@@ -75,11 +75,20 @@ def group(request):
 @login_required
 def add_member(request):
     group_name = request.POST.get('groupname')
-    group = UserGroup.objects.get(name=group_name)
     user_name = request.POST.get('username')
-    user = User.objects.get(username=user_name)
-    group.members.add(user)
-    return redirect('/group/?name={}'.format(quote(group_name)))
+    try:
+        group = UserGroup.objects.get(name=group_name)
+        user = User.objects.get(username=user_name)
+        if UserGroup.objects.filter(members=user).exists():
+            messages.add_message(request, messages.ERROR, 'User is already in the group. Please enter another user.')
+            return redirect('/group/?name={}'.format(quote(group_name)))
+        else:
+            group.members.add(user)
+            messages.add_message(request, messages.SUCCESS, 'User has been added.')
+            return redirect('/group/?name={}'.format(quote(group_name)))
+    except ObjectDoesNotExist:
+        messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
+        return redirect('/group/?name={}'.format(quote(group_name)))
 
 @require_http_methods(['GET'])
 @login_required
@@ -93,8 +102,8 @@ def give_SM_status(request):
     try:
         user = User.objects.get(username=user_name)
         group = Group.objects.get(name='Site Managers')
-        if Group.objects.filter(user=user).exists():
-            messages.add_message(request, messages.ERROR, 'User is already a site manager.')
+        if UserGroup.objects.filter(members=user).exists():
+            messages.add_message(request, messages.ERROR, 'User is already a site manager. Please enter another user.')
             return redirect('/site_manager/')
         else:
             group.user_set.add(user)
@@ -102,5 +111,29 @@ def give_SM_status(request):
             return redirect('/site_manager/')
             return HttpResponse(status=201)
     except ObjectDoesNotExist:
-        messages.add_message(request, messages.ERROR, 'User does not exist.')
+        messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
         return redirect('/site_manager/')
+
+@require_http_methods(['POST'])
+@login_required
+def delete_member(request):
+    user_name = request.POST.get('username')
+    group_name = request.POST.get('groupname')
+    try:
+        user = User.objects.get(username=user_name)
+        group = UserGroup.objects.get(name=group_name)
+        check = False
+        for member in group.members.filter():
+            if member == user:
+                group.members.remove(member)
+                check = True
+        if check == True:
+            messages.add_message(request, messages.SUCCESS, 'User has been deleted.')
+            return redirect('/group/?name={}'.format(quote(group_name)))
+            return HttpResponse(status=201)
+        else:
+            messages.add_message(request, messages.ERROR, 'User is not part of this group. Please enter another user.')
+            return redirect('/group/?name={}'.format(quote(group_name)))
+    except ObjectDoesNotExist:
+        messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
+        return redirect('/group/?name={}'.format(quote(group_name)))
