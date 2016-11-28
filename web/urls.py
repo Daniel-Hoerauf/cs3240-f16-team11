@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^add_member/$', views.add_member, name='add_member'),
     url(r'^site_manager/$', views.site_manager, name='site_manager'),
     url(r'^give_SM_status/$', views.give_SM_status, name='give_SM_status'),
+    url(r'^delete_member/$', views.delete_member, name='delete_member'),
 ]
