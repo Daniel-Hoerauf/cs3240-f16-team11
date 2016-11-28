@@ -2,7 +2,7 @@
 
 <ul>
   {% for member in group_members %}
-  <li><a href='/user/?name={{ member|escape }}'>{{ member }}</a></li>
+  <li><a href='/user/{{ member|escape }}/'>{{ member }}</a></li>
   {% endfor %}
   <form action="/add_member/" method="post" name="add">
     {% csrf_token %}

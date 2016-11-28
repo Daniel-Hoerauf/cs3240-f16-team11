@@ -1,0 +1,19 @@
+<h1>{{ message.subject }}</h1>
+
+<h3>From: {{ message.sender.username }}</h3>
+
+<p>Sent at {{ message.sent }}</p>
+
+<p>{{ message.message }}</p>
+
+<form method='post' class='form'>
+  {% csrf_token %}
+  <input name='read' value='True' type='hidden'>
+  <button type='submit' class='btn btn-primary'>Mark as unread</button>
+</form>
+
+<form method='post' class='form'>
+  {% csrf_token %}
+  <input name='delete' value='True' type='hidden'>
+  <button type='submit' class='btn btn-primary'>Delete Message</button>
+</form>
