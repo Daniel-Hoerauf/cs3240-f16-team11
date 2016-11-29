@@ -6,7 +6,7 @@ class Report(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     short_desc = models.CharField(max_length = 100)
     long_desc = models.CharField(max_length = 256)
-    files = models.CharField(max_length = 500)
+    files = models.FileField()
     private = models.NullBooleanField(null=True)
     username = models.CharField(max_length = 50)
     def __str__(self):
