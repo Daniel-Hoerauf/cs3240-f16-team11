@@ -7,7 +7,7 @@ class ReportForm(forms.ModelForm):
     short_desc = forms.CharField(widget=forms.Textarea)
     long_desc = forms.CharField(widget=forms.Textarea)
     files = forms.FileField(required=False)
-    private = forms.NullBooleanField(required=False)
+    private = forms.BooleanField(required=False)
     username = forms.CharField(max_length = 256)
 
     class Meta:
