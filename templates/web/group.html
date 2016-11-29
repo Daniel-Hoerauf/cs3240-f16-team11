@@ -1,13 +1,40 @@
-<h1> Members of {{ group_name}} </h1>
+<h1> Members of {{ group_name }} </h1>
+
+{% if messages %}
+    <div>
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message|safe }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
 
 <ul>
   {% for member in group_members %}
-  <li><a href='/user/?name={{ member|escape }}'>{{ member }}</a></li>
+    <li><a href='/user/?name={{ member|escape }}'>{{ member }}</a></li>
   {% endfor %}
+</ul>
+
+<div>
+  <p>Type in the name of a user you want to add to {{ group_name }}.</p>
   <form action="/add_member/" method="post" name="add">
     {% csrf_token %}
     <input type='hidden' name='groupname' value='{{ group_name }}'>
     <input type='text' name='username'>
     <input type='submit' value='Submit'>
-   </form>
-</ul>
+  </form>
+</div>
+
+<div>
+    {%  load web_filters %}
+    {% if user|is_site_manager %}
+      <p>Type in the name of a user you want to delete from {{ group_name }}.</p>
+      <form action="/delete_member/" method="post" name="delete">
+        {% csrf_token %}
+        <input type='hidden' name='groupname' value='{{ group_name }}'>
+        <input type='text' name='username'>
+        <input type='submit' value='Submit'>
+      </form>
+    {%  endif %}
+</div>

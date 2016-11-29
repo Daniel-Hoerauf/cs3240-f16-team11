@@ -1,10 +1,4 @@
-<h1>Site Manager Permissions</h1>
-
-<form action="/give_SM_status/" method="post" name="choose_user">
-    {% csrf_token %}
-    <input type='text' name='username'>
-    <input type='submit' value='Submit'>
-</form>
+<h3>Site Manager Status Control</h3>
 
 {% if messages %}
     <div>
@@ -16,4 +10,9 @@
     </div>
 {% endif %}
 
-<a href="/home/">Home</a>
+<p>Type in the name of the user you want to give Site Manager status.</p>
+<form action="/give_SM_status/" method="post" name="choose_user">
+    {% csrf_token %}
+    <input type='text' name='username'>
+    <input type='submit' value='Submit'>
+</form>
