@@ -35,14 +35,33 @@
         </div>
     </header>
 
-    {# login form #}
-    <h2>Login</h2>
-    <form action="/login/" method="post" class="form">
+    <h2>Register</h2>
+    {% for message in messages %}
+      <p>{{ message }}</p>
+    {% endfor %}
+
+    {% block body_block %}
+    <form method="post" action="/create_account/" class="form">
       {% csrf_token %}
-      {% bootstrap_form form %}
-      {% buttons %}
-        <button type="submit" class="btn btn-primary">Submit</button>
-      {% endbuttons %}
-      <a href='/register'>Not already registered?</a>
+{#      {% for field in form %}#}
+{#        {% bootstrap_field field %}#}
+{#      {% endfor %}#}
+{#      {% bootstrap_form form.as_p %}#}
+      <p>
+        <label for="id_username">Username:</label>
+        <input id="id_username" maxlength="254" name="username" type="text" required>
+      </p>
+      <p>
+        <label for="id_email">Email:</label>
+        <input id="id_email" maxlength="254" name="email" type="email" required>
+      </p>
+      <p>
+        <label for="id_password">Password:</label>
+        <input id="id_password" maxlength="254" name="password" type="password" required>
+      </p>
+       {% buttons %}
+            <button type="submit" class="btn btn-primary">Submit</button>
+       {% endbuttons %}
     </form>
+    {% endblock %}
 </body>

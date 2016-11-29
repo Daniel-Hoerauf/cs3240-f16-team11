@@ -1,0 +1,8 @@
+<h1>Messages for <a href='/'>{{ user.username }}</a></h1>
+
+<ul>
+{% for message in messages %}
+<li {% if not message.read %} style='font-weight: bold' {% endif %} ><a href='/message/view/{{ message.pk }}'>{{ message.subject }} -- {{ message.sender.username }}</a></li>
+
+{% endfor %}
+</ul>

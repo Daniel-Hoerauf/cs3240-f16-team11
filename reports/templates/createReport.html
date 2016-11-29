@@ -1,0 +1,17 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create a Report</title>
+</head>
+<body>
+    <h1>Add A New Report</h1>
+    <form action='/reports/' method='post'>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <!--<input type='submit' value='Submit' />-->
+        <button type="submit" class="save btn btn-default">Save</button>
+
+    </form>
+</body>
+</html>

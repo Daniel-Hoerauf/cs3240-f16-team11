@@ -1,0 +1,18 @@
+<h3>Site Manager Status Control</h3>
+
+{% if messages %}
+    <div>
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message|safe }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<p>Type in the name of the user you want to give Site Manager status.</p>
+<form action="/give_SM_status/" method="post" name="choose_user">
+    {% csrf_token %}
+    <input type='text' name='username'>
+    <input type='submit' value='Submit'>
+</form>
