@@ -8,12 +8,12 @@ def login():
     username = click.prompt('Username', type=str)
     password = click.prompt('Password', type=str)
     #authenticate user using requests
-    # r = requests.get('[REPLACE WITH URL OF LOGIN PAGE]', auth=(username, password))
-    # if(r.status_code == requests.codes.ok):
-    #     userFiles()
-    # else:
-    #     click.echo('Invalid username and password')
-    #     login()
+    r = requests.get('https://afternoon-fortress-38321.herokuapp.com/login/?next=/', auth=(username, password))
+    if(r.status_code == requests.codes.ok):
+        userFiles()
+    else:
+        click.echo('Invalid username and password')
+        login()
 
 def userFiles():
     click.echo('Here is a list of your files:')
