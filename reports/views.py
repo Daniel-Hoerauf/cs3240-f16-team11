@@ -4,6 +4,8 @@ from .models import Report
 from django.template import loader
 from .forms import ReportForm
 from django.template import RequestContext
+from web.models import UserGroup
+from django.contrib.auth.models import User
 # Create your views here.
 
 def index(request):
@@ -11,27 +13,24 @@ def index(request):
 def thanks(request):
     return render(request, 'form.html')
 
-def create(request):
+# def create(request):
 
-    return render(request, 'createReport.html', {'form': form_class,})
+    # return render(request, 'createReport.html', {'form': form_class,})
 
 def add_report(request):
-    form_class = ReportForm
+    form_class = ReportForm(user=request.user)
     # if this is a POST request process the form data
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
-        form = ReportForm(request.POST)
+        form = ReportForm(request.POST, user=request.user)
         # check whether it's valid:
         if form.is_valid():
-            # process the data in form.cleaned_data as required
-            # r = ReportForm()
-            # r.title = form.cleaned_data['title']
-            # r.short_desc = form.cleaned_data['short_desc']
-            # r.long_desc = form.cleaned_data['long_desc']
-            # r.username = form.cleaned_data['username']
-            # r.private = form.cleaned_data['private']
-
-            form.save(commit=True)
+            report = form.save(commit=False)
+            report.owner = User.objects.get(username=request.user.username)
+            if form.cleaned_data['Share with:'] != 'all':
+                report.group = UserGroup.objects.get(
+                    name=form.cleaned_data['Share with:'])
+            report.save()
 
         # redirect to a new URL:
             return render(request, 'createReport.html', {'form': form_class})
@@ -40,9 +39,6 @@ def add_report(request):
             text = form.errors
             return HttpResponse(text)
 
-    else:
-        form = ReportForm()
-    #return render(request, 'createReport.html', {'form': form_class})
     return render(request, 'createReport.html', {'form': form_class})
 
 def see_reports(request):
