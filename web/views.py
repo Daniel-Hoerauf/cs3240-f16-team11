@@ -21,8 +21,12 @@ random_generator = Random.new().read
 @login_required
 def home(request):
     user = User.objects.get(username=request.user.username)
-    unread = Message.objects.filter(recipient=user).filter(read=False)
-    return render(request, 'web/home.html', {'unread': len(unread)})
+    if user.is_active:
+        unread = Message.objects.filter(recipient=user).filter(read=False)
+        return render(request, 'web/home.html', {'unread': len(unread)})
+    else:
+        messages.add_message(request, messages.ERROR, 'You do not have permission to login. Please contact your site manager.')
+        return redirect('/login/')
 
 
 @require_http_methods(['GET'])
@@ -41,6 +45,7 @@ def create_account(request):
         error(request, 'That username has already been taken')
         return redirect('/register/')
     user.set_password(password)
+    user.is_active = True
     user.save()
     user = authenticate(username=username, password=password)
     login(request, user)
@@ -235,3 +240,41 @@ def delete_member(request):
     except ObjectDoesNotExist:
         messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
         return redirect('/group/?name={}'.format(quote(group_name)))
+
+@require_http_methods(['POST'])
+@login_required
+def suspend_account(request):
+    user_name = request.POST.get('username')
+    try:
+        user = User.objects.get(username=user_name)
+        if user.is_active:
+            user.is_active = False
+            user.save()
+            messages.add_message(request, messages.SUCCESS, 'User is now suspended.')
+            return redirect('/site_manager/')
+            return HttpResponse(status=201)
+        else:
+            messages.add_message(request, messages.ERROR, "User's account is already suspended. Please enter another user.")
+            return redirect('/site_manager/')
+    except ObjectDoesNotExist:
+        messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
+        return redirect('/site_manager/')
+
+@require_http_methods(['POST'])
+@login_required
+def restore_account(request):
+    user_name = request.POST.get('username')
+    try:
+        user = User.objects.get(username=user_name)
+        if user.is_active:
+            messages.add_message(request, messages.ERROR, "User's account is already active. Please enter another user.")
+            return redirect('/site_manager/')
+        else:
+            user.is_active = True
+            user.save()
+            messages.add_message(request, messages.SUCCESS, 'User is now active.')
+            return redirect('/site_manager/')
+            return HttpResponse(status=201)
+    except ObjectDoesNotExist:
+        messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
+        return redirect('/site_manager/')
