@@ -42,8 +42,12 @@ def add_report(request):
     return render(request, 'createReport.html', {'form': form_class})
 
 def see_reports(request):
+    query = request.GET.get('search', '')
     template = loader.get_template('see_reports.html')
-    reports_list = Report.objects.all()
+    reports_list = Report.objects.all().filter(group=None)
+    for group in UserGroup.objects.filter(members=request.user):
+        reports_list = reports_list | group.report_set.all()
+        # reports_list += group.report_set.all()
     output = ', '.join([r.title for r in reports_list])
     context = RequestContext(request, {'reports_list': reports_list})
     return HttpResponse(template.render(context))
