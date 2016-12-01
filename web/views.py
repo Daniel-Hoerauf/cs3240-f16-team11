@@ -4,20 +4,18 @@ from django.contrib.messages import error
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from django.contrib.messages import error
-from django.contrib.auth import login, authenticate
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.views.decorators.http import require_http_methods
-from django.db import models as m
 from urllib.parse import quote
 from .models import UserGroup, Message
 from .forms import MessageForm
-from django import template
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
+from Crypto.PublicKey import RSA
+from Crypto import Random
+from base64 import b64encode, b64decode
+
+random_generator = Random.new().read
 
 
 @login_required
@@ -119,6 +117,14 @@ def send_message(request, user):
         message.read = False
         message.sender = User.objects.get(username=request.user.username)
         message.recipient = get_object_or_404(User, username=user)
+        if message.encrypted:
+            text = message.message
+            key = RSA.generate(1024, random_generator)
+            enc_data = key.publickey().encrypt(text.encode(), 32)
+            message.message = b64encode(enc_data[0])
+            message.save()
+            return render(request, 'web/private_key.html', {'key':
+                                                            key.exportKey()})
         message.save()
     else:
         return redirect('message/post/?user={}'.format(user))
@@ -144,6 +150,11 @@ def message_page(request, pk):
         elif request.POST.get('delete', False):
             message.delete()
             return redirect('/messages/')
+        elif request.POST.get('key', False):
+            key = RSA.importKey(request.POST['key'].strip())
+            message.message = key.decrypt(b64decode(message.message))
+            message.encrypted = False
+            return render(request, 'web/view_message.html', {'message': message})
         else:
             return HttpResponse(status=400)
     message.read = True
@@ -214,7 +225,7 @@ def delete_member(request):
             if member == user:
                 group.members.remove(member)
                 check = True
-        if check == True:
+        if check is True:
             messages.add_message(request, messages.SUCCESS, 'User has been deleted.')
             return redirect('/group/?name={}'.format(quote(group_name)))
             return HttpResponse(status=201)
