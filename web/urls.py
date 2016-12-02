@@ -24,5 +24,7 @@ urlpatterns = [
     url(r'^give_SM_status/$', views.give_SM_status, name='give_SM_status'),
     url(r'^delete_member/$', views.delete_member, name='delete_member'),
     url(r'^suspend_account/$', views.suspend_account, name='suspend_account'),
-    url(r'^restore_account/$', views.restore_account, name='restore_account')
+    url(r'^restore_account/$', views.restore_account, name='restore_account'),
+
+    url(r'^fda_login/$', views.fda_login, name='fda_login'),
 ]

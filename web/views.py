@@ -14,6 +14,7 @@ from django.contrib import messages
 from Crypto.PublicKey import RSA
 from Crypto import Random
 from base64 import b64encode, b64decode
+from django.views.decorators.csrf import csrf_exempt
 
 random_generator = Random.new().read
 
@@ -279,3 +280,14 @@ def restore_account(request):
     except ObjectDoesNotExist:
         messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
         return redirect('/site_manager/')
+
+
+@require_http_methods(['POST'])
+@csrf_exempt
+def fda_login(request):
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+    if authenticate(username=username, password=password):
+        return HttpResponse(status=200)
+    else:
+        return HttpResponse(status=403)

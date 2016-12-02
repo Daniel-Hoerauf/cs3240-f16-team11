@@ -4,11 +4,11 @@ from requests.auth import HTTPBasicAuth
 
 @click.command()
 def login():
-    click.echo('Hello! Please login.')
+    click.echo('Please login.')
     username = click.prompt('Username', type=str)
     password = click.prompt('Password', type=str)
-    #authenticate user using requests
-    r = requests.get('https://afternoon-fortress-38321.herokuapp.com/login/?next=/', auth=(username, password))
+    #authenticate user using requests - CHANGE URL TO HEROKU AFTER DEVELOPMENT
+    r = requests.post('http://127.0.0.1:8000/fda_login/', data={'username': username, 'password': password})
     if(r.status_code == requests.codes.ok):
         userFiles()
     else:
