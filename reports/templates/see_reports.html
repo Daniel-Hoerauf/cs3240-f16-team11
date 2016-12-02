@@ -18,6 +18,9 @@
                     <li><span>Public</span></li>
                     {% endif %}
                     <LI><span>Created: </span>{{ report.timestamp }}</LI>
+                    {% if report.files %}
+                    <li><span><a href='/reports/uploads/{{ report.pk }}/'>Download File</a></span></li>
+                    {% endif %}
                     <button type="button" onclick="alert('Report Saved to Your Folder')">Save Report</button>
 		    <p></p>
             {% endfor %}

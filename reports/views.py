@@ -35,11 +35,6 @@ def add_report(request):
 
     return render(request, 'createReport.html', {'form': form_class})
 
-
-def get_file_dest(instance, filename):
-    return 'user_{}/{}/{}/{}'.format(instance.owner.pk, instance.timestamp.minute,
-                                     instance.timestamp.second, filename)
-
 @login_required
 def see_reports(request):
     query = request.GET.get('search', '')
@@ -59,6 +54,8 @@ def download_file(request, pk):
     if report.group is not None:
         if report.group not in UserGroup.objects.filter(members=request.user):
             return HttpResponse(status=404)
-    response = HttpResponse(report.file, content_type='text/plain')
-    # response['Content-Disposition'] = 'attachment; filename=%s' % filename
+
+    filename = report.files.name.split('/')[-1]
+    response = HttpResponse(report.files, content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename=%s' % filename
     return response
