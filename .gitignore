@@ -91,3 +91,6 @@ ENV/
 
 # Databases
 *.sqlite3
+
+# Uploaded files
+media/
