@@ -42,8 +42,9 @@ def see_reports(request):
     reports_list = Report.objects.all().filter(group=None)
     for group in UserGroup.objects.filter(members=request.user):
         reports_list = reports_list | group.report_set.all()
-        # reports_list += group.report_set.all()
-    output = ', '.join([r.title for r in reports_list])
+    # I don't think this line does anything but I don't want to delete it till
+    # I'm sure
+    # output = ', '.join([r.title for r in reports_list])
     context = RequestContext(request, {'reports_list': reports_list})
     return HttpResponse(template.render(context))
 
