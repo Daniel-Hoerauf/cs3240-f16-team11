@@ -38,3 +38,28 @@
       </form>
     {%  endif %}
 </div>
+<div>
+{% if reports_list %}
+            <UL>
+            {% for report in reports_list %}
+                    <LI><b>{{ report.title }}</b></LI>
+                    <LI<span>Owner: </span>{{ report.owner.username }}</LI>
+                    <LI><span>Description: </span>{{ report.short_desc }}</LI>
+                    <LI><span>Summary: </span>{{ report.long_desc }}</LI>
+                    {% if report.group %}
+                    <LI><span>Shared with: </span>{{ report.group.name }}</LI>
+                    {% else %}
+                    <li><span>Public</span></li>
+                    {% endif %}
+                    <LI><span>Created: </span>{{ report.timestamp }}</LI>
+                    {% if report.files %}
+                    <li><span><a href='/reports/uploads/{{ report.pk }}/'>Download File</a></span></li>
+                    {% endif %}
+                    <button type="button" onclick="alert('Report Saved to Your Folder')">Save Report</button>
+		    <p></p>
+            {% endfor %}
+            </UL>
+    {% else %}
+            <P>No reports at present.</P>
+    {% endif %}
+</div>

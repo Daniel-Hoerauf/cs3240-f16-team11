@@ -1,37 +1,30 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from .models import Report
 from django.template import loader
 from .forms import ReportForm
 from django.template import RequestContext
+from web.models import UserGroup
+from django.contrib.auth.models import User
 # Create your views here.
 
-def index(request):
-    return render(request, 'createReport.html')
-def thanks(request):
-    return render(request, 'form.html')
 
-def create(request):
-
-    return render(request, 'createReport.html', {'form': form_class,})
-
+@login_required
 def add_report(request):
-    form_class = ReportForm
+    form_class = ReportForm(user=request.user)
     # if this is a POST request process the form data
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
-        form = ReportForm(request.POST)
+        form = ReportForm(request.POST, request.FILES, user=request.user)
         # check whether it's valid:
         if form.is_valid():
-            # process the data in form.cleaned_data as required
-            # r = ReportForm()
-            # r.title = form.cleaned_data['title']
-            # r.short_desc = form.cleaned_data['short_desc']
-            # r.long_desc = form.cleaned_data['long_desc']
-            # r.username = form.cleaned_data['username']
-            # r.private = form.cleaned_data['private']
-
-            form.save(commit=True)
+            report = form.save(commit=False)
+            report.owner = User.objects.get(username=request.user.username)
+            if form.cleaned_data['Share with:'] != 'all':
+                report.group = UserGroup.objects.get(
+                    name=form.cleaned_data['Share with:'])
+            report.save()
 
         # redirect to a new URL:
             return render(request, 'createReport.html', {'form': form_class})
@@ -40,14 +33,30 @@ def add_report(request):
             text = form.errors
             return HttpResponse(text)
 
-    else:
-        form = ReportForm()
-    #return render(request, 'createReport.html', {'form': form_class})
     return render(request, 'createReport.html', {'form': form_class})
 
+@login_required
 def see_reports(request):
+    query = request.GET.get('search', '')
     template = loader.get_template('see_reports.html')
-    reports_list = Report.objects.all()
-    output = ', '.join([r.title for r in reports_list])
+    reports_list = Report.objects.all().filter(group=None)
+    for group in UserGroup.objects.filter(members=request.user):
+        reports_list = reports_list | group.report_set.all()
+    # I don't think this line does anything but I don't want to delete it till
+    # I'm sure
+    # output = ', '.join([r.title for r in reports_list])
     context = RequestContext(request, {'reports_list': reports_list})
     return HttpResponse(template.render(context))
+
+
+@login_required
+def download_file(request, pk):
+    report = get_object_or_404(Report, pk=pk)
+    if report.group is not None:
+        if report.group not in UserGroup.objects.filter(members=request.user):
+            return HttpResponse(status=404)
+
+    filename = report.files.name.split('/')[-1]
+    response = HttpResponse(report.files, content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename=%s' % filename
+    return response

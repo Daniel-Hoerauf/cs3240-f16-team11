@@ -1,5 +1,15 @@
 <h1>Hello {{ user.username }}</h1>
 
+{% if messages %}
+    <div>
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message|safe }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
 <h4><a href='/groups/'>Groups</a></h4>
 <h4><a href='/users/'>Users</a></h4>
 
