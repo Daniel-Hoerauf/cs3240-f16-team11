@@ -2,13 +2,20 @@ from django.db import models
 from django.contrib.auth.models import User
 from web.models import UserGroup
 
+
+def get_file_dest(instance, filename):
+    return 'user_{}/{}/{}/{}'.format(instance.owner.pk, instance.timestamp.minute,
+                                     instance.timestamp.second, filename)
+
+
 # Create your models here.
 class Report(models.Model):
     title = models.CharField(max_length=32)
     timestamp = models.DateTimeField(auto_now_add=True)
     short_desc = models.CharField(max_length=100)
     long_desc = models.TextField()
-    files = models.FileField(null=True, blank=True)
+    files = models.FileField(null=True, blank=True,
+                             upload_to=get_file_dest)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     group = models.ForeignKey(UserGroup,
                               on_delete=models.CASCADE,

@@ -79,9 +79,10 @@ def group(request):
     for member in group.members.all():
         if member != request.user:
             members.append(member)
+    reports_list = group.report_set.all()
     return render(request, 'web/group.html', {'group_name': group_name,
-                                              'group_members': members})
-    return HttpResponse(status=200)
+                                              'group_members': members,
+                                              'reports_list': reports_list})
 
 
 @require_http_methods(['POST'])
