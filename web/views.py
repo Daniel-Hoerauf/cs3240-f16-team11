@@ -14,7 +14,10 @@ from django.contrib import messages
 from Crypto.PublicKey import RSA
 from Crypto import Random
 from base64 import b64encode, b64decode
+from django.template import loader
+from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
+from reports.models import Report
 
 random_generator = Random.new().read
 
@@ -70,6 +73,7 @@ def create_group(request):
     group.save()
     return redirect('/groups/')
     return HttpResponse(status=201)
+
 
 @require_http_methods(['GET'])
 @login_required
@@ -219,6 +223,7 @@ def give_SM_status(request):
         messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
         return redirect('/site_manager/')
 
+
 @require_http_methods(['POST'])
 @login_required
 def delete_member(request):
@@ -243,6 +248,7 @@ def delete_member(request):
         messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
         return redirect('/group/?name={}'.format(quote(group_name)))
 
+
 @require_http_methods(['POST'])
 @login_required
 def suspend_account(request):
@@ -262,6 +268,7 @@ def suspend_account(request):
         messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
         return redirect('/site_manager/')
 
+
 @require_http_methods(['POST'])
 @login_required
 def restore_account(request):
@@ -279,6 +286,53 @@ def restore_account(request):
             return HttpResponse(status=201)
     except ObjectDoesNotExist:
         messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
+        return redirect('/site_manager/')
+
+
+@login_required
+def SM_get_reports(request):
+    user_name = request.POST.get('username')
+    try:
+        user = User.objects.get(username=user_name)
+        reports_list = []
+        user_reports = Report.objects.filter(owner=user)
+        if user_reports:
+            for reports in user_reports:
+                reports_list.append(reports)
+            return render(request, 'web/SM_manage_reports.html', {'reports_list': reports_list, 'selected_user' : user_name})
+        else:
+            messages.add_message(request, messages.ERROR, 'User has no reports at present.')
+            return redirect('/site_manager/')
+    except ObjectDoesNotExist:
+        messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
+        return redirect('/site_manager/')
+
+
+@require_http_methods(['POST'])
+@login_required
+def SM_delete_reports(request):
+    try:
+        #get POST variables
+        chosen_reports = request.POST.getlist('reports[]')
+        selected_user = request.POST.get('selected_user')
+        #delete chosen reports
+        for report in chosen_reports:
+            report_obj = Report.objects.filter(title=report)
+            report_obj.delete()
+        #update selected user's reports
+        reports_list = []
+        user = User.objects.get(username=selected_user)
+        user_reports = Report.objects.filter(owner=user)
+        if user_reports:
+            for report in user_reports:
+                for c_report in  chosen_reports:
+                    if report != c_report:
+                        reports_list.append(report)
+        #update SM_manage_reports page
+        messages.add_message(request, messages.SUCCESS, 'Messages deleted.')
+        return render(request, 'web/SM_manage_reports.html', {'reports_list': reports_list})
+    except ValueError:
+        messages.add_message(request, messages.ERROR, 'Error')
         return redirect('/site_manager/')
 
 
