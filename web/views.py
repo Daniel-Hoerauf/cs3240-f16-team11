@@ -14,6 +14,13 @@ from django.contrib import messages
 from Crypto.PublicKey import RSA
 from Crypto import Random
 from base64 import b64encode, b64decode
+from django.template import loader
+from django.template import RequestContext
+from django.views.decorators.csrf import csrf_exempt
+from reports.models import Report
+from reports.views import download_file
+import json
+
 
 random_generator = Random.new().read
 
@@ -70,6 +77,7 @@ def create_group(request):
     return redirect('/groups/')
     return HttpResponse(status=201)
 
+
 @require_http_methods(['GET'])
 @login_required
 def group(request):
@@ -79,9 +87,10 @@ def group(request):
     for member in group.members.all():
         if member != request.user:
             members.append(member)
+    reports_list = group.report_set.all()
     return render(request, 'web/group.html', {'group_name': group_name,
-                                              'group_members': members})
-    return HttpResponse(status=200)
+                                              'group_members': members,
+                                              'reports_list': reports_list})
 
 
 @require_http_methods(['POST'])
@@ -217,6 +226,7 @@ def give_SM_status(request):
         messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
         return redirect('/site_manager/')
 
+
 @require_http_methods(['POST'])
 @login_required
 def delete_member(request):
@@ -241,6 +251,7 @@ def delete_member(request):
         messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
         return redirect('/group/?name={}'.format(quote(group_name)))
 
+
 @require_http_methods(['POST'])
 @login_required
 def suspend_account(request):
@@ -260,6 +271,7 @@ def suspend_account(request):
         messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
         return redirect('/site_manager/')
 
+
 @require_http_methods(['POST'])
 @login_required
 def restore_account(request):
@@ -278,3 +290,98 @@ def restore_account(request):
     except ObjectDoesNotExist:
         messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
         return redirect('/site_manager/')
+
+
+@login_required
+def SM_get_reports(request):
+    user_name = request.POST.get('username')
+    try:
+        user = User.objects.get(username=user_name)
+        reports_list = []
+        user_reports = Report.objects.filter(owner=user)
+        if user_reports:
+            for reports in user_reports:
+                reports_list.append(reports)
+            return render(request, 'web/SM_manage_reports.html', {'reports_list': reports_list, 'selected_user' : user_name})
+        else:
+            messages.add_message(request, messages.ERROR, 'User has no reports at present.')
+            return redirect('/site_manager/')
+    except ObjectDoesNotExist:
+        messages.add_message(request, messages.ERROR, 'User does not exist. Please enter another user.')
+        return redirect('/site_manager/')
+
+
+@require_http_methods(['POST'])
+@login_required
+def SM_delete_reports(request):
+    try:
+        #get POST variables
+        chosen_reports = request.POST.getlist('reports[]')
+        selected_user = request.POST.get('selected_user')
+        #delete chosen reports
+        for report in chosen_reports:
+            report_obj = Report.objects.filter(title=report)
+            report_obj.delete()
+        #update selected user's reports
+        reports_list = []
+        user = User.objects.get(username=selected_user)
+        user_reports = Report.objects.filter(owner=user)
+        if user_reports:
+            for report in user_reports:
+                for c_report in  chosen_reports:
+                    if report != c_report:
+                        reports_list.append(report)
+        #update SM_manage_reports page
+        messages.add_message(request, messages.SUCCESS, 'Messages deleted.')
+        return render(request, 'web/SM_manage_reports.html', {'reports_list': reports_list})
+    except ValueError:
+        messages.add_message(request, messages.ERROR, 'Error')
+        return redirect('/site_manager/')
+
+
+@require_http_methods(['POST'])
+@csrf_exempt
+def fda_login(request):
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+    if authenticate(username=username, password=password):
+        return HttpResponse(status=200)
+    else:
+        return HttpResponse(status=403)
+
+
+@require_http_methods(['POST'])
+@csrf_exempt
+def fda_view_all_files(request):
+    user_name = request.POST.get('username')
+    user = User.objects.get(username=user_name)
+
+    reports_list = []
+    user_reports = Report.objects.filter(owner=user)
+    if user_reports:
+        for report in user_reports:
+            reports_list.append({'report_id' : report.id, 'report_title' : report.title })
+        return HttpResponse(json.dumps({'reports_list' : reports_list}), content_type='application/json')
+    else:
+        return HttpResponse(status=404)
+
+
+@require_http_methods(['POST'])
+@csrf_exempt
+def fda_view_report_contents(request):
+    report_id = request.POST.get('report_id')
+    report_obj = Report.objects.get(id=report_id)
+    title = str(report_obj.title)
+    owner = str(report_obj.owner.username)
+    short_desc = str(report_obj.short_desc)
+    long_desc = str(report_obj.long_desc)
+    shared_with = str(report_obj.group)
+    if shared_with == None:
+        shared_with = 'Public'
+    timestamp = str(report_obj.timestamp)
+    files = str(report_obj.files.name.split('/')[-1])
+    if files == '':
+        files = "None"
+    report_info = {'title' : title, 'owner' : owner, 'short_desc' : short_desc, 'long_desc' : long_desc,
+                   'shared_with' : shared_with, 'timestamp' : timestamp, 'files' : files}
+    return HttpResponse(json.dumps({'report_info': report_info}), content_type='application/json')

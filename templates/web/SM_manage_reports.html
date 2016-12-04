@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Secure File Share</title>
+</head>
+<body>
+    <div>
+        {% if reports_list %}
+            {% for report in reports_list %}
+                <form action="{% url 'SM_delete_reports' %}" method="post" name="user_reports">
+                  {% csrf_token %}
+                  <input type="checkbox" name="reports[]" id="{{ report.id }}" value="{{ report.title }}"> {{ report.title }}
+                  <input type="hidden" name="selected_user" value="{{ selected_user }}">
+                  <input type="submit" value="Delete">
+                </form>
+            {% endfor %}
+        {% endif %}
+    </div>
+</body>
+</html>
