@@ -1,4 +1,11 @@
-<h1>Hello {{ user.username }}</h1>
+{% extends 'base.html' %}
+
+{% block title %}
+Secure File Share
+{% endblock %}
+
+{% block content %}
+<h1>Hello {{ user.username | title }}</h1>
 
 {% if messages %}
     <div>
@@ -25,3 +32,4 @@
 </div>
 
 <a href="/logout/">Logout</a>
+{% endblock %}
