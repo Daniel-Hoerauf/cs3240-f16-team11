@@ -359,7 +359,28 @@ def fda_view_all_files(request):
     user_reports = Report.objects.filter(owner=user)
     if user_reports:
         for report in user_reports:
-            reports_list.append(report.title)
+            reports_list.append({'report_id' : report.id, 'report_title' : report.title })
         return HttpResponse(json.dumps({'reports_list' : reports_list}), content_type='application/json')
     else:
         return HttpResponse(status=404)
+
+
+@require_http_methods(['POST'])
+@csrf_exempt
+def fda_view_report_contents(request):
+    report_id = request.POST.get('report_id')
+    report_obj = Report.objects.get(id=report_id)
+    title = str(report_obj.title)
+    owner = str(report_obj.owner.username)
+    short_desc = str(report_obj.short_desc)
+    long_desc = str(report_obj.long_desc)
+    shared_with = str(report_obj.group)
+    if shared_with == None:
+        shared_with = 'Public'
+    timestamp = str(report_obj.timestamp)
+    files = str(report_obj.files)
+    if files == '':
+        files = "None"
+    report_info = {'title' : title, 'owner' : owner, 'short_desc' : short_desc, 'long_desc' : long_desc,
+                   'shared_with' : shared_with, 'timestamp' : timestamp, 'files' : files}
+    return HttpResponse(json.dumps({'report_info': report_info}), content_type='application/json')
