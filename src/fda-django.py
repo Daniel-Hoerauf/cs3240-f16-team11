@@ -39,6 +39,7 @@ def view_files(username):
         click.echo('You do not currently have any reports. Goodbye.')
     else:
        click.echo('Error. Please contact site manager.')
+       exit()
 
 
 def view_report_contents(reports_list):
@@ -63,9 +64,9 @@ def view_report_contents(reports_list):
         click.echo('Created: ' + report_info['timestamp'])
         click.echo('Files: ' + report_info['files'])
 
-        if click.confirm("Would you like to download this report's files?"):
-            # fda_download_files()
-            click.echo('download files')
+        if click.confirm("Would you like to download the files contained in this report?"):
+            # download_file(report_id, reports_list)
+            print('something happens')
         else:
             if click.confirm("Would you like to view another report's contents?"):
                 view_report_contents(reports_list)
@@ -76,6 +77,7 @@ def view_report_contents(reports_list):
         click.echo('You do not currently have any reports. Goodbye.')
     else:
         click.echo('Error. Please contact site manager.')
+        exit()
 
 
 if __name__ == '__main__':

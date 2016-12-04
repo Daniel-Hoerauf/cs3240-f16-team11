@@ -18,6 +18,7 @@ from django.template import loader
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from reports.models import Report
+from reports.views import download_file
 import json
 
 
@@ -378,7 +379,7 @@ def fda_view_report_contents(request):
     if shared_with == None:
         shared_with = 'Public'
     timestamp = str(report_obj.timestamp)
-    files = str(report_obj.files)
+    files = str(report_obj.files.name.split('/')[-1])
     if files == '':
         files = "None"
     report_info = {'title' : title, 'owner' : owner, 'short_desc' : short_desc, 'long_desc' : long_desc,

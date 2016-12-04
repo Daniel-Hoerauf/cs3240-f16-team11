@@ -7,7 +7,12 @@ from .forms import ReportForm
 from django.template import RequestContext
 from web.models import UserGroup
 from django.contrib.auth.models import User
+from Crypto.PublicKey import RSA
+from Crypto import Random
+from base64 import b64encode, b64decode
 # Create your views here.
+
+random_generator = Random.new().read
 
 
 @login_required
@@ -24,6 +29,14 @@ def add_report(request):
             if form.cleaned_data['Share with:'] != 'all':
                 report.group = UserGroup.objects.get(
                     name=form.cleaned_data['Share with:'])
+            if report.file_encrypted == True:
+                #open file
+                file = report.files
+                file_contents = file.read()
+                #encrypt contents
+                key = RSA.generate(1024, random_generator)
+                enc_data = key.publickey().encrypt(file_contents, 32)
+                report.files = b64encode(enc_data[0])
             report.save()
 
         # redirect to a new URL:
