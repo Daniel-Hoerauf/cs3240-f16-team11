@@ -18,6 +18,8 @@ from django.template import loader
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from reports.models import Report
+import json
+
 
 random_generator = Random.new().read
 
@@ -345,3 +347,19 @@ def fda_login(request):
         return HttpResponse(status=200)
     else:
         return HttpResponse(status=403)
+
+
+@require_http_methods(['POST'])
+@csrf_exempt
+def fda_view_all_files(request):
+    user_name = request.POST.get('username')
+    user = User.objects.get(username=user_name)
+
+    reports_list = []
+    user_reports = Report.objects.filter(owner=user)
+    if user_reports:
+        for report in user_reports:
+            reports_list.append(report.title)
+        return HttpResponse(json.dumps({'reports_list' : reports_list}), content_type='application/json')
+    else:
+        return HttpResponse(status=404)

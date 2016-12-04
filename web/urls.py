@@ -29,4 +29,5 @@ urlpatterns = [
     url(r'^SM_delete_reports/$', views.SM_delete_reports, name='SM_delete_reports'),
 
     url(r'^fda_login/$', views.fda_login, name='fda_login'),
+    url(r'^fda_view_all_files/$', views.fda_view_all_files, name='fda_view_all_files'),
 ]
