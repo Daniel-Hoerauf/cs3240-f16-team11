@@ -2,11 +2,10 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from .models import Report
-from django.template import loader
 from .forms import ReportForm
-from django.template import RequestContext
 from web.models import UserGroup
 from django.contrib.auth.models import User
+from datetime import datetime
 # Create your views here.
 
 
@@ -27,26 +26,57 @@ def add_report(request):
             report.save()
 
         # redirect to a new URL:
-            return render(request, 'createReport.html', {'form': form_class})
+            return render(request, 'reports/createReport.html', {'form': form_class})
 
         else:
             text = form.errors
             return HttpResponse(text)
 
-    return render(request, 'createReport.html', {'form': form_class})
+    return render(request, 'reports/createReport.html', {'form': form_class})
 
 @login_required
 def see_reports(request):
-    query = request.GET.get('search', '')
-    template = loader.get_template('see_reports.html')
+    initial_search = {}
     reports_list = Report.objects.all().filter(group=None)
     for group in UserGroup.objects.filter(members=request.user):
         reports_list = reports_list | group.report_set.all()
-    # I don't think this line does anything but I don't want to delete it till
-    # I'm sure
-    # output = ', '.join([r.title for r in reports_list])
-    context = RequestContext(request, {'reports_list': reports_list})
-    return HttpResponse(template.render(context))
+    # Filter based by min date
+    if request.GET.get('sincesearch', False):
+        date_in = request.GET['sincesearch']
+        initial_search['since'] = date_in
+        date_since = datetime(
+            *[int(v) for v in date_in.replace('T', '-').replace(':',
+                                                                '-').split('-')])
+        reports_list = reports_list.filter(timestamp__gte=date_since)
+    # Filter based by max date
+    if request.GET.get('beforesearch', False):
+        date_in = request.GET['beforesearch']
+        initial_search['before'] = date_in
+        date_since = datetime(
+            *[int(v) for v in date_in.replace('T', '-').replace(':',
+                                                                '-').split('-')])
+        reports_list = reports_list.filter(timestamp__lte=date_since)
+    # Filter based on creator
+    if request.GET.get('ownersearch', False):
+        owner = request.GET['ownersearch']
+        initial_search['owner'] = owner
+        reports_list = reports_list.filter(owner__username__icontains=owner)
+    # Filter based on title
+    if request.GET.get('titlesearch', False):
+        title = request.GET['titlesearch']
+        initial_search['title'] = title
+        reports_list = reports_list.filter(title__icontains=title)
+    # Filter based on descriptions
+    if request.GET.get('descsearch', False):
+        desc = request.GET['descsearch']
+        initial_search['desc'] = desc
+        short_search = reports_list.filter(short_desc__icontains=desc)
+        long_search = reports_list.filter(long_desc__icontains=desc)
+        reports_list = short_search | long_search
+    return render(request, 'reports/see_reports.html', {'reports_list':
+                                                        reports_list,
+                                                        'search_values':
+                                                        initial_search})
 
 
 @login_required

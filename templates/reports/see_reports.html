@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Reports</title>
+    {% load bootstrap3 %}
+    {% bootstrap_javascript jquery=True %}
+    {% bootstrap_css %}
+</head>
+<body>
+    <div class='container'>
+            <form class='form-horizontal'>
+              <div class='form-group'>
+                <label class='control-label' for='owner'>Owner's name contains: </label>
+                <input type='search' id='owner' name='ownersearch' value='{{ search_values.owner }}'>
+              </div>
+              <div class='form-group'>
+                <label class='control-label' for='title'>Title contains: </label>
+                <input type='search' id='title' name='titlesearch' value='{{ search_values.title }}'>
+              </div>
+              <div class='form-group'>
+                <label class='control-label' for='desc'>Description contains:</label>
+                <input type='search' id='desc' name='descsearch' value='{{ search_values.desc }}'>
+              </div>
+              <div class='form-group'>
+                <label class='control-label' for='since'>Report created after:</label>
+                <input type='datetime-local' id='since' name='sincesearch' value='{{ search_values.since }}'>
+              </div>
+              <div class='form-group'>
+                <label class='control=label' for='before'>Report created before:</label>
+                <input type='datetime-local' id='before' name='beforesearch' value='{{ search_values.before }}'>
+              {% buttons %}
+                <button type='submit' class='btn btn-primary'>Search</button>
+              {% endbuttons %}
+            </form>
+    {% if reports_list %}
+            <UL>
+            {% for report in reports_list %}
+                    <LI><b>{{ report.title }}</b></LI>
+                    <LI<span>Owner: </span>{{ report.owner.username }}</LI>
+                    <LI><span>Description: </span>{{ report.short_desc }}</LI>
+                    <LI><span>Summary: </span>{{ report.long_desc }}</LI>
+                    {% if report.group %}
+                    <LI><span>Shared with: </span>{{ report.group.name }}</LI>
+                    {% else %}
+                    <li><span>Public</span></li>
+                    {% endif %}
+                    <LI><span>Created: </span>{{ report.timestamp }}</LI>
+                    {% if report.files %}
+                    <li><span><a href='/reports/uploads/{{ report.pk }}/'>Download File</a></span></li>
+                    {% endif %}
+                    <button type="button" onclick="alert('Report Saved to Your Folder')">Save Report</button>
+		    <p></p>
+            {% endfor %}
+            </UL>
+    {% else %}
+            <P>No reports at present.</P>
+    {% endif %}
+    </div>
+</body>
+</html>
