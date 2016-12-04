@@ -1,3 +1,10 @@
+{% load bootstrap3 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+<form>
+  <input type='search' name='usersearch'>
+  <input type='submit'>
+</form>
 <ul>
   {% for user in user_list %}
     <li><a href='/user/{{ user.username|escape }}/'>{{ user.username }}</a></li> 

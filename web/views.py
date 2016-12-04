@@ -14,8 +14,6 @@ from django.contrib import messages
 from Crypto.PublicKey import RSA
 from Crypto import Random
 from base64 import b64encode, b64decode
-from django.template import loader
-from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from reports.models import Report
 from reports.views import download_file
@@ -179,7 +177,7 @@ def message_page(request, pk):
 @require_http_methods(['GET'])
 @login_required
 def find_users(request):
-    query = request.GET.get('username', '')
+    query = request.GET.get('usersearch', '')
     users = User.objects.all().filter(username__icontains=query).exclude(
         username=request.user.username)
     curr_user = User.objects.get(username=request.user.username)
@@ -302,7 +300,7 @@ def SM_get_reports(request):
         if user_reports:
             for reports in user_reports:
                 reports_list.append(reports)
-            return render(request, 'web/SM_manage_reports.html', {'reports_list': reports_list, 'selected_user' : user_name})
+            return render(request, 'web/SM_manage_reports.html', {'reports_list': reports_list, 'selected_user': user_name})
         else:
             messages.add_message(request, messages.ERROR, 'User has no reports at present.')
             return redirect('/site_manager/')
@@ -315,23 +313,23 @@ def SM_get_reports(request):
 @login_required
 def SM_delete_reports(request):
     try:
-        #get POST variables
+        # get POST variables
         chosen_reports = request.POST.getlist('reports[]')
         selected_user = request.POST.get('selected_user')
-        #delete chosen reports
+        # delete chosen reports
         for report in chosen_reports:
             report_obj = Report.objects.filter(title=report)
             report_obj.delete()
-        #update selected user's reports
+        # update selected user's reports
         reports_list = []
         user = User.objects.get(username=selected_user)
         user_reports = Report.objects.filter(owner=user)
         if user_reports:
             for report in user_reports:
-                for c_report in  chosen_reports:
+                for c_report in chosen_reports:
                     if report != c_report:
                         reports_list.append(report)
-        #update SM_manage_reports page
+        # update SM_manage_reports page
         messages.add_message(request, messages.SUCCESS, 'Messages deleted.')
         return render(request, 'web/SM_manage_reports.html', {'reports_list': reports_list})
     except ValueError:
