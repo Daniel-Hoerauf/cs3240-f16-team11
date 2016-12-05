@@ -16,7 +16,7 @@ class ReportForm(forms.ModelForm):
 
     class Meta:
         model = Report
-        fields = ('title', 'short_desc', 'long_desc', 'files')
+        fields = ('title', 'short_desc', 'long_desc', 'files', 'file_encrypted')
 
 
 
@@ -24,5 +24,4 @@ class EditReportForm(forms.ModelForm):
     title = forms.CharField(required=True,help_text="Name")
     class Meta:
         model = Report
-        fields = ('title', 'short_desc', 'long_desc', 'files')
-
+        fields = ('title', 'short_desc', 'long_desc', 'files', 'file_encrypted')

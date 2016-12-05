@@ -14,10 +14,11 @@ from django.contrib import messages
 from Crypto.PublicKey import RSA
 from Crypto import Random
 from base64 import b64encode, b64decode
-from django.template import loader
-from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from reports.models import Report
+from reports.views import download_file
+import json
+
 
 random_generator = Random.new().read
 
@@ -176,7 +177,7 @@ def message_page(request, pk):
 @require_http_methods(['GET'])
 @login_required
 def find_users(request):
-    query = request.GET.get('username', '')
+    query = request.GET.get('usersearch', '')
     users = User.objects.all().filter(username__icontains=query).exclude(
         username=request.user.username)
     curr_user = User.objects.get(username=request.user.username)
@@ -299,7 +300,7 @@ def SM_get_reports(request):
         if user_reports:
             for reports in user_reports:
                 reports_list.append(reports)
-            return render(request, 'web/SM_manage_reports.html', {'reports_list': reports_list, 'selected_user' : user_name})
+            return render(request, 'web/SM_manage_reports.html', {'reports_list': reports_list, 'selected_user': user_name})
         else:
             messages.add_message(request, messages.ERROR, 'User has no reports at present.')
             return redirect('/site_manager/')
@@ -312,23 +313,23 @@ def SM_get_reports(request):
 @login_required
 def SM_delete_reports(request):
     try:
-        #get POST variables
+        # get POST variables
         chosen_reports = request.POST.getlist('reports[]')
         selected_user = request.POST.get('selected_user')
-        #delete chosen reports
+        # delete chosen reports
         for report in chosen_reports:
             report_obj = Report.objects.filter(title=report)
             report_obj.delete()
-        #update selected user's reports
+        # update selected user's reports
         reports_list = []
         user = User.objects.get(username=selected_user)
         user_reports = Report.objects.filter(owner=user)
         if user_reports:
             for report in user_reports:
-                for c_report in  chosen_reports:
+                for c_report in chosen_reports:
                     if report != c_report:
                         reports_list.append(report)
-        #update SM_manage_reports page
+        # update SM_manage_reports page
         messages.add_message(request, messages.SUCCESS, 'Messages deleted.')
         return render(request, 'web/SM_manage_reports.html', {'reports_list': reports_list})
     except ValueError:
@@ -345,3 +346,40 @@ def fda_login(request):
         return HttpResponse(status=200)
     else:
         return HttpResponse(status=403)
+
+
+@require_http_methods(['POST'])
+@csrf_exempt
+def fda_view_all_files(request):
+    user_name = request.POST.get('username')
+    user = User.objects.get(username=user_name)
+
+    reports_list = []
+    user_reports = Report.objects.filter(owner=user)
+    if user_reports:
+        for report in user_reports:
+            reports_list.append({'report_id' : report.id, 'report_title' : report.title })
+        return HttpResponse(json.dumps({'reports_list' : reports_list}), content_type='application/json')
+    else:
+        return HttpResponse(status=404)
+
+
+@require_http_methods(['POST'])
+@csrf_exempt
+def fda_view_report_contents(request):
+    report_id = request.POST.get('report_id')
+    report_obj = Report.objects.get(id=report_id)
+    title = str(report_obj.title)
+    owner = str(report_obj.owner.username)
+    short_desc = str(report_obj.short_desc)
+    long_desc = str(report_obj.long_desc)
+    shared_with = str(report_obj.group)
+    if shared_with == None:
+        shared_with = 'Public'
+    timestamp = str(report_obj.timestamp)
+    files = str(report_obj.files.name.split('/')[-1])
+    if files == '':
+        files = "None"
+    report_info = {'title' : title, 'owner' : owner, 'short_desc' : short_desc, 'long_desc' : long_desc,
+                   'shared_with' : shared_with, 'timestamp' : timestamp, 'files' : files}
+    return HttpResponse(json.dumps({'report_info': report_info}), content_type='application/json')
