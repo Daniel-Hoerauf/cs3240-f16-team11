@@ -147,7 +147,7 @@ def send_message(request, user):
 @login_required
 def all_messages(request):
     user = User.objects.get(username=request.user.username)
-    messages = user.message_to.all()
+    messages = list(user.message_to.all())[::-1]
     return render(request, 'web/messages.html', {'messages': messages})
 
 
@@ -183,7 +183,8 @@ def find_users(request):
     curr_user = User.objects.get(username=request.user.username)
     if curr_user in users:
         users.remove(curr_user)
-    return render(request, 'web/user_list.html', {'user_list': users})
+    return render(request, 'web/user_list.html', {'user_list': users,
+                                                  'search': query})
 
     return HttpResponse(status=200)
 

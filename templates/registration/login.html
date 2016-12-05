@@ -1,40 +1,11 @@
-<!DOCTYPE html>
-<head>
-    <title>Secure File Share</title>
-    {% load staticfiles %}
-    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+{% extends 'base.html' %}
+{% load bootstrap3 %}
 
-    {% load bootstrap3 %}
-    {% bootstrap_css %}
-    {% bootstrap_javascript %}
-</head>
+{% block title %}
+Login 
+{% endblock %}
 
-<body>
-    {# Navigation Menu #}
-    <header>
-        <div class="navbar navbar-default navbar-static-top {% block nav-style %}{% endblock %}">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="/">Secure File Share</a>
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav navbar-right">
-                    {% if user.is_authenticated %}
-                        <li><a href="">Logout</a></li>
-                    {% else %}
-                        <li><a href="/login">Login</a></li>
-                        <li><a href="/register">Sign Up</a></li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </header>
-
+{% block content %}
     {% if messages %}
         <div>
             {% for message in messages %}
@@ -55,4 +26,4 @@
       {% endbuttons %}
       <a href='/register'>Not already registered?</a>
     </form>
-</body>
+{% endblock %}

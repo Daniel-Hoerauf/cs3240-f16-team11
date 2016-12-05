@@ -1,4 +1,12 @@
-<h1>Hello {{ user.username }}</h1>
+{% extends 'base.html' %}
+
+{% block title %}
+Secure File Share
+{% endblock %}
+
+{% block content %}
+<h1>Hello {{ user.username | title }}</h1>
+<hr>
 
 {% if messages %}
     <div>
@@ -10,12 +18,12 @@
     </div>
 {% endif %}
 
-<h4><a href='/groups/'>Groups</a></h4>
-<h4><a href='/users/'>Users</a></h4>
+<h4><a class='btn btn-primary btn-lg btn-block' href='/groups/'>Groups</a></h4>
+<h4><a class='btn btn-primary btn-lg btn-block' href='/users/'>Users</a></h4>
 
-<a href='/messages/'>View Messages: ({{ unread }}) unread</a><br>
-<h4><a href='/reports/'>Add a Report</a></h4>
-<h4><a href='/reports/see/'>View Reports</a></h4>
+<h4><a class='btn btn-primary btn-lg btn-block' href='/messages/'>View Messages: ({{ unread }}) unread</a></h4>
+<h4><a class='btn btn-primary btn-lg btn-block' href='/reports/'>Add a Report</a></h4>
+<h4><a class='btn btn-primary btn-lg btn-block' href='/reports/see/'>View Reports</a></h4>
 
 <div>
     {%  load web_filters %}
@@ -24,4 +32,4 @@
     {%  endif %}
 </div>
 
-<a href="/logout/">Logout</a>
+{% endblock %}
