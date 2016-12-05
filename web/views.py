@@ -404,5 +404,17 @@ def edit_info(request):
             user = authenticate(username=username,
                                 password=request.POST['new_pass'])
             login(request, user)
-            messages.success(request, 'Sucessfully updated password!')
+            messages.success(request, 'Successfully updated password!')
             return redirect('manage_account')
+    elif request.POST.get('email', False):
+        curr_pass = request.POST['password']
+        if not request.user.check_password(curr_pass):
+            messages.error(request, 'Incorrect password given')
+            return redirect('manage_account')
+        else:
+            request.user.email = request.POST['new_email']
+            request.user.save()
+            messages.success(request, 'Successfully updated email addresss')
+            return redirect('manage_account')
+    else:
+        return HttpResponse(status=404)
