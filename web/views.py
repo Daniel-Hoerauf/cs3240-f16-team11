@@ -16,7 +16,6 @@ from Crypto import Random
 from base64 import b64encode, b64decode
 from django.views.decorators.csrf import csrf_exempt
 from reports.models import Report
-from reports.views import download_file
 import json
 
 
@@ -359,8 +358,8 @@ def fda_view_all_files(request):
     user_reports = Report.objects.filter(owner=user)
     if user_reports:
         for report in user_reports:
-            reports_list.append({'report_id' : report.id, 'report_title' : report.title })
-        return HttpResponse(json.dumps({'reports_list' : reports_list}), content_type='application/json')
+            reports_list.append({'report_id': report.id, 'report_title': report.title})
+        return HttpResponse(json.dumps({'reports_list': reports_list}), content_type='application/json')
     else:
         return HttpResponse(status=404)
 
@@ -375,12 +374,47 @@ def fda_view_report_contents(request):
     short_desc = str(report_obj.short_desc)
     long_desc = str(report_obj.long_desc)
     shared_with = str(report_obj.group)
-    if shared_with == None:
+    if shared_with is None:
         shared_with = 'Public'
     timestamp = str(report_obj.timestamp)
     files = str(report_obj.files.name.split('/')[-1])
     if files == '':
         files = "None"
-    report_info = {'title' : title, 'owner' : owner, 'short_desc' : short_desc, 'long_desc' : long_desc,
-                   'shared_with' : shared_with, 'timestamp' : timestamp, 'files' : files}
+    report_info = {'title': title, 'owner': owner, 'short_desc': short_desc, 'long_desc': long_desc,
+                   'shared_with': shared_with, 'timestamp': timestamp, 'files': files}
     return HttpResponse(json.dumps({'report_info': report_info}), content_type='application/json')
+
+
+@login_required
+def edit_info(request):
+    if request.method == 'GET':
+        return render(request, 'web/edit_info.html', {})
+    elif request.POST.get('pass', False):
+        curr_pass = request.POST['current']
+        if not request.user.check_password(curr_pass):
+            messages.error(request, 'Incorrect password given')
+            return redirect('manage_account')
+        elif request.POST['new_pass'] != request.POST['new_pass_repeat']:
+            messages.error(request, 'Passwords do not match')
+            return redirect('manage_account')
+        else:
+            username = request.user.username
+            request.user.set_password(request.POST['new_pass'])
+            request.user.save()
+            user = authenticate(username=username,
+                                password=request.POST['new_pass'])
+            login(request, user)
+            messages.success(request, 'Successfully updated password!')
+            return redirect('manage_account')
+    elif request.POST.get('email', False):
+        curr_pass = request.POST['password']
+        if not request.user.check_password(curr_pass):
+            messages.error(request, 'Incorrect password given')
+            return redirect('manage_account')
+        else:
+            request.user.email = request.POST['new_email']
+            request.user.save()
+            messages.success(request, 'Successfully updated email addresss')
+            return redirect('manage_account')
+    else:
+        return HttpResponse(status=404)
