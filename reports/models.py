@@ -17,6 +17,7 @@ class Report(models.Model):
     files = models.FileField(null=True, blank=True,
                              upload_to=get_file_dest)
     file_encrypted = models.BooleanField(default=False)
+    keyword = models.CharField(max_length=32, default='')
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     group = models.ForeignKey(UserGroup,
                               on_delete=models.CASCADE,

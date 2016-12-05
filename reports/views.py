@@ -131,10 +131,45 @@ def see_reports(request):
 
 @login_required
 def see_my_reports(request):
-    template = loader.get_template('reports/see_my_reports.html')
+    initial_search = {}
     my_reports_list = Report.objects.all().filter(owner=request.user)
-    context = RequestContext(request, {'my_reports_list': my_reports_list})
-    return render(request, 'reports/see_my_reports.html', {'my_reports_list':my_reports_list})
+    for group in UserGroup.objects.filter(members=request.user):
+        my_reports_list = my_reports_list | group.report_set.all()
+    # Filter based by min date
+    if request.GET.get('sincesearch', False):
+        date_in = request.GET['sincesearch']
+        initial_search['since'] = date_in
+        date_since = datetime(
+            *[int(v) for v in date_in.replace('T', '-').replace(':',
+                                                                '-').split('-')])
+        my_reports_list = my_reports_list.filter(timestamp__gte=date_since)
+    # Filter based by max date
+    if request.GET.get('beforesearch', False):
+        date_in = request.GET['beforesearch']
+        initial_search['before'] = date_in
+        date_since = datetime(
+            *[int(v) for v in date_in.replace('T', '-').replace(':',
+                                                                '-').split('-')])
+        my_reports_list = my_reports_list.filter(timestamp__lte=date_since)
+    # Filter based on creator
+    if request.GET.get('ownersearch', False):
+        owner = request.GET['ownersearch']
+        initial_search['owner'] = owner
+        my_reports_list = my_reports_list.filter(owner__username__icontains=owner)
+    # Filter based on title
+    if request.GET.get('titlesearch', False):
+        title = request.GET['titlesearch']
+        initial_search['title'] = title
+        my_reports_list = my_reports_list.filter(title__icontains=title)
+    # Filter based on descriptions
+    if request.GET.get('descsearch', False):
+        desc = request.GET['descsearch']
+        initial_search['desc'] = desc
+        short_search = my_reports_list.filter(short_desc__icontains=desc)
+        long_search = my_reports_list.filter(long_desc__icontains=desc)
+        my_reports_list = short_search | long_search
+
+    return render(request, 'reports/see_my_reports.html', {'my_reports_list':my_reports_list, 'search_values': initial_search})
 
 @login_required
 def delete_report(request, id=None):
