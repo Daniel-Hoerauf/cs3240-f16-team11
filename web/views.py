@@ -144,7 +144,7 @@ def send_message(request, user):
 @login_required
 def all_messages(request):
     user = User.objects.get(username=request.user.username)
-    messages = user.message_to.all()
+    messages = list(user.message_to.all())[::-1]
     return render(request, 'web/messages.html', {'messages': messages})
 
 
