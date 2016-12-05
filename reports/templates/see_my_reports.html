@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>View Reports</title>
+    <title>View Your Reports</title>
 </head>
 <body>
-    <h1>View All Available Reports</h1>
-    {% if reports_list %}
+    <h1>View Your Reports</h1>
+    {% if my_reports_list %}
             <UL>
-            {% for report in reports_list %}
+            {% for report in my_reports_list %}
                     <LI><b>{{ report.title }}</b></LI>
                     <LI<span>Owner: </span>{{ report.owner.username }}</LI>
                     <LI><span>Description: </span>{{ report.short_desc }}</LI>
@@ -24,6 +24,8 @@
                     <li><span><a href='/reports/uploads/{{ report.pk }}/'>Download File</a></span></li>
                     {% endif %}
                     <button type="button" onclick="alert('Report Saved to Your Folder')">Save Report</button>
+                    <a href='/reports/edit/{{report.id}}/'>Edit this Report</a>
+                    <a href='/reports/delete/{{report.id}}/'>Delete this Report</a>
 
 		    <p></p>
             {% endfor %}
@@ -31,6 +33,6 @@
     {% else %}
             <P>No reports at present.</P>
     {% endif %}
-    <a href='/reports/MyReports/'>View Your Reports</a>
 </body>
+<a href='/reports/see/'>View All Available Reports</a>
 </html>

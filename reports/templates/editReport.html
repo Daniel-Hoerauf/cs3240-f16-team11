@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit a Report</title>
+</head>
+<body>
+    <h1>Edit A Report</h1>
+    <form action="{% url 'report_edit' id %}" method='post' enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <!--<input type='submit' value='Submit' />-->
+        <button type="submit" class="save btn btn-default">Save</button>
+
+    </form>
+</body>
+</html>

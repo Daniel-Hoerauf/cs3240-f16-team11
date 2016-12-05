@@ -3,18 +3,18 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from .models import Report
 from django.template import loader
-from .forms import ReportForm
+from .forms import ReportForm, EditReportForm
 from django.template import RequestContext
 from web.models import UserGroup
 from django.contrib.auth.models import User
 # Create your views here.
-
 
 @login_required
 def add_report(request):
     form_class = ReportForm(user=request.user)
     # if this is a POST request process the form data
     if request.method == 'POST':
+
         # create a form instance and populate it with data from the request:
         form = ReportForm(request.POST, request.FILES, user=request.user)
         # check whether it's valid:
@@ -36,6 +36,35 @@ def add_report(request):
     return render(request, 'createReport.html', {'form': form_class})
 
 @login_required
+def edit_report(request, id=None):
+    if id:
+        report = Report.objects.get(pk=id)
+        print(report.title)
+    else:
+        report = Report()
+    form_class = ReportForm(user=request.user, instance=report)
+    if request.method == 'POST':
+        form = ReportForm(request.POST, request.FILES, instance=report, user=request.user)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.owner = User.objects.get(username=request.user.username)
+            if form.cleaned_data['Share with:'] != 'all':
+                report.group = UserGroup.objects.get(
+                    name=form.cleaned_data['Share with:'])
+            report.save()
+            text = 'Form has been edited'
+            #return HttpResponse(text)
+            return render(request, 'doneEditing.html', {'form': form_class})
+
+        else:
+            text = form.errors
+            return HttpResponse(text)
+
+    return render(request, 'editReport.html', {'form': form_class, 'id': id})
+
+
+
+@login_required
 def see_reports(request):
     query = request.GET.get('search', '')
     template = loader.get_template('see_reports.html')
@@ -47,6 +76,23 @@ def see_reports(request):
     # output = ', '.join([r.title for r in reports_list])
     context = RequestContext(request, {'reports_list': reports_list})
     return HttpResponse(template.render(context))
+
+@login_required
+def see_my_reports(request):
+    template = loader.get_template('see_my_reports.html')
+    my_reports_list = Report.objects.all().filter(owner=request.user)
+    context = RequestContext(request, {'my_reports_list': my_reports_list})
+    return HttpResponse(template.render(context))
+
+@login_required
+def delete_report(request, id=None):
+    report = Report.objects.get(id=id)
+    if report.owner != request.user:
+        text = "You do not have permission to delete this report"
+        return HttpResponse(text)
+    else:
+        Report.objects.filter(id=id).delete()
+    return render(request, 'deleteReport.html')
 
 
 @login_required
