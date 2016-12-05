@@ -14,6 +14,7 @@ from datetime import datetime
 # Create your views here.
 random_generator = Random.new().read
 
+
 @login_required
 def add_report(request):
     form_class = ReportForm(user=request.user)
@@ -74,13 +75,13 @@ def edit_report(request, id=None):
             report.save()
             text = 'Form has been edited'
             #return HttpResponse(text)
-            return render(request, 'doneEditing.html', {'form': form_class})
+            return render(request, 'reports/doneEditing.html', {'form': form_class})
 
         else:
             text = form.errors
             return HttpResponse(text)
 
-    return render(request, 'editReport.html', {'form': form_class, 'id': id})
+    return render(request, 'reports/editReport.html', {'form': form_class, 'id': id})
 
 
 
@@ -130,10 +131,10 @@ def see_reports(request):
 
 @login_required
 def see_my_reports(request):
-    template = loader.get_template('see_my_reports.html')
+    template = loader.get_template('reports/see_my_reports.html')
     my_reports_list = Report.objects.all().filter(owner=request.user)
     context = RequestContext(request, {'my_reports_list': my_reports_list})
-    return HttpResponse(template.render(context))
+    return render(request, 'reports/see_my_reports.html', {'my_reports_list':my_reports_list})
 
 @login_required
 def delete_report(request, id=None):
@@ -143,7 +144,7 @@ def delete_report(request, id=None):
         return HttpResponse(text)
     else:
         Report.objects.filter(id=id).delete()
-    return render(request, 'deleteReport.html')
+    return render(request, 'reports/deleteReport.html')
 
 
 @login_required
