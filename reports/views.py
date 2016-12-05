@@ -21,7 +21,7 @@ def add_report(request):
     # if this is a POST request process the form data
     if request.method == 'POST':
 
-        # create a form instance and populate it with data from the request:
+        # create a form instance and populate it with data from the request
         form = ReportForm(request.POST, request.FILES, user=request.user)
         # check whether it's valid:
         if form.is_valid():
@@ -60,7 +60,9 @@ def add_report(request):
 def edit_report(request, id=None):
     if id:
         report = Report.objects.get(pk=id)
-        print(report.title)
+        if report.owner != request.user:
+            text = "You do not have permission to edit this report"
+            return HttpResponse(text)
     else:
         report = Report()
     form_class = ReportForm(user=request.user, instance=report)
@@ -132,7 +134,7 @@ def see_reports(request):
 @login_required
 def see_my_reports(request):
     initial_search = {}
-    my_reports_list = Report.objects.all().filter(owner=request.user)
+    my_reports_list = Report.objects.all().filter(owner=request.user).order_by('keyword')
     for group in UserGroup.objects.filter(members=request.user):
         my_reports_list = my_reports_list | group.report_set.all()
     # Filter based by min date
