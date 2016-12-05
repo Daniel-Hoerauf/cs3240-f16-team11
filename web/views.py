@@ -180,7 +180,8 @@ def find_users(request):
     curr_user = User.objects.get(username=request.user.username)
     if curr_user in users:
         users.remove(curr_user)
-    return render(request, 'web/user_list.html', {'user_list': users})
+    return render(request, 'web/user_list.html', {'user_list': users,
+                                                  'search': query})
 
     return HttpResponse(status=200)
 

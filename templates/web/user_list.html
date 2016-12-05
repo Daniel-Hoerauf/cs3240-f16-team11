@@ -1,12 +1,29 @@
+{% extends 'base.html' %}
 {% load bootstrap3 %}
-{% bootstrap_css %}
-{% bootstrap_javascript %}
+
+{% block title %}
+Users 
+{% endblock %}
+
+{% block content %}
 <form>
-  <input type='search' name='usersearch'>
-  <input type='submit'>
+  <div class='form-group'>
+    <label class='control-label' for='usersearch'>Search by Username:</label>
+    <input class='form-control' type='text' id='usersearch' value='{{ search }}' name='usersearch'>
+  </div>
+  {% buttons %}
+  <button type='submit' class='btn btn-lg btn-primary'>Search</button>
+  {% endbuttons %}
 </form>
-<ul>
+{% if not user_list %}
+  <h2> No users found matching search </h2>
+{% else %}
+<ul class='list-group'>
   {% for user in user_list %}
-    <li><a href='/user/{{ user.username|escape }}/'>{{ user.username }}</a></li> 
+  <li class='list-group-item'><h4>
+      <a href='/message/post/?user={{ user.username|escape }}'>{{ user.username }}</a>
+    </h4></li> 
   {% endfor %}
 </ul>
+{% endif %}
+{% endblock %}
