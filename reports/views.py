@@ -1,15 +1,11 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from .models import Report
-from django.template import loader
-from .forms import ReportForm, EditReportForm
-from django.template import RequestContext
+from .models import Report, UploadedFile
+from .forms import ReportForm
 from web.models import UserGroup
 from django.contrib.auth.models import User
-from Crypto.PublicKey import RSA
 from Crypto import Random
-from base64 import b64encode, b64decode
 from datetime import datetime
 # Create your views here.
 random_generator = Random.new().read
@@ -30,22 +26,15 @@ def add_report(request):
             if form.cleaned_data['Share with:'] != 'all':
                 report.group = UserGroup.objects.get(
                     name=form.cleaned_data['Share with:'])
-            if report.file_encrypted == True:
-                #open file
-                file = report.files
-                file_contents = file.read()
-                print(file_contents)
-                #encrypt contents
-                key = RSA.generate(1024, random_generator)
-                encrypted_data = key.publickey().encrypt(file_contents, 32)
-                encoded_data = b64encode(encrypted_data[0])
-                report.files = encoded_data.decode("utf-8")
-                #download file with private key
-                response = HttpResponse(key.exportKey(), content_type='text/plain')
-                response['Content-Disposition'] = 'attachment; filename=%s.pem' % file.name
-                return response
-
+            files = request.FILES.getlist('file_field')
             report.save()
+            for f in files:
+                file = UploadedFile(report=report, owner=request.user)
+                file.file_obj = f
+                file.save()
+
+
+
 
         # redirect to a new URL:
             return render(request, 'reports/createReport.html', {'form': form_class})
@@ -74,7 +63,6 @@ def edit_report(request, id=None):
                     name=form.cleaned_data['Share with:'])
             report.save()
             text = 'Form has been edited'
-            #return HttpResponse(text)
             return render(request, 'reports/doneEditing.html', {'form': form_class})
 
         else:
@@ -169,7 +157,8 @@ def see_my_reports(request):
         long_search = my_reports_list.filter(long_desc__icontains=desc)
         my_reports_list = short_search | long_search
 
-    return render(request, 'reports/see_my_reports.html', {'my_reports_list':my_reports_list, 'search_values': initial_search})
+    return render(request, 'reports/see_my_reports.html',
+                  {'my_reports_list': my_reports_list, 'search_values': initial_search})
 
 @login_required
 def delete_report(request, id=None):
