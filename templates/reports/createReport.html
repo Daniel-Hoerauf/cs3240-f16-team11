@@ -1,17 +1,18 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Create a Report</title>
-</head>
-<body>
+﻿{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block title %}
+Create Report
+{% endblock %}
+
+{% block content %}
     <h1>Add A New Report</h1>
-    <form action='/reports/' method='post' enctype="multipart/form-data">
+    <form action='/reports/' class='form' method='post' enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
-        <!--<input type='submit' value='Submit' />-->
-        <button type="submit" class="save btn btn-default">Save</button>
+        {% bootstrap_form form %}
+        {% buttons %}
+          <button type="submit" class="save btn btn-default">Save</button>
+        {% endbuttons %}
 
     </form>
-</body>
-</html>
+{% endblock %}
