@@ -6,6 +6,7 @@ urlpatterns = [
     url(r'^register/$', views.register_page, name='register_page'),
     url(r'^create_account/$', views.create_account, name='create_account'),
     url(r'^home/$', views.home, name='home'),
+    url(r'^info/edit/$', views.edit_info, name='manage_account'),
 
     url(r'^groups/$', views.groups, name='groups'),
     url(r'^create_group/$', views.create_group, name='create_group'),
