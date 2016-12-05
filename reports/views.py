@@ -38,6 +38,11 @@ def add_report(request):
                 encrypted_data = key.publickey().encrypt(file_contents, 32)
                 encoded_data = b64encode(encrypted_data[0])
                 report.files = encoded_data.decode("utf-8")
+                #download file with private key
+                response = HttpResponse(key.exportKey(), content_type='text/plain')
+                response['Content-Disposition'] = 'attachment; filename=%s.pem' % file.name
+                return response
+
             report.save()
 
         # redirect to a new URL:
