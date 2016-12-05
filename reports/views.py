@@ -2,18 +2,24 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from .models import Report
-from .forms import ReportForm
+from django.template import loader
+from .forms import ReportForm, EditReportForm
+from django.template import RequestContext
 from web.models import UserGroup
 from django.contrib.auth.models import User
+from Crypto.PublicKey import RSA
+from Crypto import Random
+from base64 import b64encode, b64decode
 from datetime import datetime
 # Create your views here.
-
+random_generator = Random.new().read
 
 @login_required
 def add_report(request):
     form_class = ReportForm(user=request.user)
     # if this is a POST request process the form data
     if request.method == 'POST':
+
         # create a form instance and populate it with data from the request:
         form = ReportForm(request.POST, request.FILES, user=request.user)
         # check whether it's valid:
@@ -23,6 +29,21 @@ def add_report(request):
             if form.cleaned_data['Share with:'] != 'all':
                 report.group = UserGroup.objects.get(
                     name=form.cleaned_data['Share with:'])
+            if report.file_encrypted == True:
+                #open file
+                file = report.files
+                file_contents = file.read()
+                print(file_contents)
+                #encrypt contents
+                key = RSA.generate(1024, random_generator)
+                encrypted_data = key.publickey().encrypt(file_contents, 32)
+                encoded_data = b64encode(encrypted_data[0])
+                report.files = encoded_data.decode("utf-8")
+                #download file with private key
+                response = HttpResponse(key.exportKey(), content_type='text/plain')
+                response['Content-Disposition'] = 'attachment; filename=%s.pem' % file.name
+                return response
+
             report.save()
 
         # redirect to a new URL:
@@ -33,6 +54,35 @@ def add_report(request):
             return HttpResponse(text)
 
     return render(request, 'reports/createReport.html', {'form': form_class})
+
+@login_required
+def edit_report(request, id=None):
+    if id:
+        report = Report.objects.get(pk=id)
+        print(report.title)
+    else:
+        report = Report()
+    form_class = ReportForm(user=request.user, instance=report)
+    if request.method == 'POST':
+        form = ReportForm(request.POST, request.FILES, instance=report, user=request.user)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.owner = User.objects.get(username=request.user.username)
+            if form.cleaned_data['Share with:'] != 'all':
+                report.group = UserGroup.objects.get(
+                    name=form.cleaned_data['Share with:'])
+            report.save()
+            text = 'Form has been edited'
+            #return HttpResponse(text)
+            return render(request, 'doneEditing.html', {'form': form_class})
+
+        else:
+            text = form.errors
+            return HttpResponse(text)
+
+    return render(request, 'editReport.html', {'form': form_class, 'id': id})
+
+
 
 @login_required
 def see_reports(request):
@@ -77,6 +127,23 @@ def see_reports(request):
                                                         reports_list,
                                                         'search_values':
                                                         initial_search})
+
+@login_required
+def see_my_reports(request):
+    template = loader.get_template('see_my_reports.html')
+    my_reports_list = Report.objects.all().filter(owner=request.user)
+    context = RequestContext(request, {'my_reports_list': my_reports_list})
+    return HttpResponse(template.render(context))
+
+@login_required
+def delete_report(request, id=None):
+    report = Report.objects.get(id=id)
+    if report.owner != request.user:
+        text = "You do not have permission to delete this report"
+        return HttpResponse(text)
+    else:
+        Report.objects.filter(id=id).delete()
+    return render(request, 'deleteReport.html')
 
 
 @login_required
