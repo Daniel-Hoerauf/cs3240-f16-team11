@@ -57,11 +57,11 @@ View Reports
                     {% else %}
                     <li><span>No files attached</span></li>
                     {% endif %}
+                    {% endif %}
                     <p></p>
                     <a class='btn btn-primary btn-sm btn-default' href='/reports/edit/{{report.id}}/'>Edit this Report</a>
                     <p></p>
                     <a class='btn btn-primary btn-sm btn-default' href='/reports/delete/{{report.id}}/'>Delete this Report</a>
-
 
 		    <p></p>
             {% endfor %}
