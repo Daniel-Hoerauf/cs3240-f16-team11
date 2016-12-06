@@ -1,14 +1,70 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, render_to_response
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from .models import Report, UploadedFile
-from .forms import ReportForm
+from .models import Report, UploadedFile, Folder
+from .forms import ReportForm, FolderForm
+from django.template import RequestContext
 from web.models import UserGroup
 from django.contrib.auth.models import User
 from Crypto import Random
 from datetime import datetime
 # Create your views here.
 random_generator = Random.new().read
+
+def index(request):
+    return render(request, 'createReport.html')
+def thanks(request):
+    return render(request, 'form.html')
+
+
+def folders(request):
+    reports = Report.objects.all()
+    folders = Folder.objects.all()
+    return render(request, 'reports/folders.html', {'folders': folders})
+
+def viewReportsInFolders(request):
+    folders = Folder.objects.all()
+    reports = Report.objects.all()
+
+    return render(request, 'reports/savedReports.html',
+                  {'folders': folders, 'reports': reports})
+
+def create_folder(request):
+    reports = Report.objects.all()
+    username_id = request.user
+    if request.method == 'POST':
+        form = FolderForm(request.POST, request.FILES)
+        selected = request.POST.getlist('selected_report[]')
+        if form.is_valid():
+            folder_object = Folder.objects.create(
+                name=form.cleaned_data['title'], owner=username_id
+            )
+            for report_selected in selected:
+                re = Report.objects.get(title=report_selected)
+                folder_object.members.add(re)
+        return HttpResponse("Folder has been created")
+
+
+    else:
+        form = FolderForm()
+    variables = RequestContext(request, {
+        'form': form, 'reports': reports
+    })
+
+    return render_to_response(
+        'reports/folderz.html',
+        variables,
+    )
+
+
+
+def folder(request):
+    folder_name = request.POST.get('selected')
+    print(folder_name)
+    reports = Report.objects.all()
+    print(reports)
+    return render(request, 'reports/folder.html', {'folder_name': folder_name,
+                                                   'reports': reports})
 
 
 @login_required
@@ -17,7 +73,7 @@ def add_report(request):
     # if this is a POST request process the form data
     if request.method == 'POST':
 
-        # create a form instance and populate it with data from the request:
+        # create a form instance and populate it with data from the request
         form = ReportForm(request.POST, request.FILES, user=request.user)
         # check whether it's valid:
         if form.is_valid():
@@ -47,38 +103,41 @@ def add_report(request):
 
 @login_required
 def edit_report(request, id=None):
-    if id:
-        report = Report.objects.get(pk=id)
-        print(report.title)
-    else:
-        report = Report()
-    form_class = ReportForm(user=request.user, instance=report)
-    if request.method == 'POST':
-        form = ReportForm(request.POST, request.FILES, instance=report, user=request.user)
-        if form.is_valid():
-            report = form.save(commit=False)
-            report.owner = User.objects.get(username=request.user.username)
-            if form.cleaned_data['Share with:'] != 'all':
-                report.group = UserGroup.objects.get(
-                    name=form.cleaned_data['Share with:'])
-            files = request.FILES.getlist('file_field')
-            report.save()
-            for curr in report.file_set.all():
-                curr.delete()
-            for f in files:
-                file = UploadedFile(report=report, owner=request.user)
-                file.file_obj = f
-                file.save()
-            text = 'Form has been edited'
-            return render(request, 'reports/doneEditing.html', {'form': form_class})
-
+    try:
+        if id:
+            report = Report.objects.get(pk=id)
+            if report.owner != request.user:
+                text = "You do not have permission to edit this report"
+                return HttpResponse(text)
         else:
-            text = form.errors
-            return HttpResponse(text)
+            report = Report()
+        form_class = ReportForm(user=request.user, instance=report)
+        if request.method == 'POST':
+            form = ReportForm(request.POST, request.FILES, instance=report, user=request.user)
+            if form.is_valid():
+                report = form.save(commit=False)
+                report.owner = User.objects.get(username=request.user.username)
+                if form.cleaned_data['Share with:'] != 'all':
+                    report.group = UserGroup.objects.get(
+                        name=form.cleaned_data['Share with:'])
+                files = request.FILES.getlist('file_field')
+                report.save()
+                for curr in report.file_set.all():
+                    curr.delete()
+                for f in files:
+                    file = UploadedFile(report=report, owner=request.user)
+                    file.file_obj = f
+                    file.save()
+                return render(request, 'reports/doneEditing.html', {'form': form_class})
+
+            else:
+                text = form.errors
+                return HttpResponse(text)
+    except:
+        text = "You do not have permission to edit this report"
+        return HttpResponse(text)
 
     return render(request, 'reports/editReport.html', {'form': form_class, 'id': id})
-
-
 
 @login_required
 def see_reports(request):
@@ -128,10 +187,54 @@ def see_reports(request):
                                                         'search_values':
                                                         initial_search})
 
+def add_reports(request, folder_name):
+    print("hi")
+    print(folder_name)
+    reports = Report.objects.all()
+    username_id = request.user
+    print(request.method)
+    if request.method == 'POST':
+        print("hi2")
+        form = FolderForm(request.POST)
+        selected = request.POST.getlist('selectedReport[]')
+        print(selected)
+        if form.is_valid():
+            print("hi3")
+            folder_object = Folder.objects.create(name=folder_name,
+                                                  owner=username_id)
+            folder_object.save()
+            for report_selected in selected:
+                re = Report.objects.get(title=report_selected)
+                folder_object.members.add(re)
+            print(folder_object.members)
+
+
+    else:
+        form = FolderForm()
+        folder_object = []
+        if folder_name is not None:
+            folder_object = Folder.objects.get(name=folder_name)
+        print(folder_object)
+        print(folder_object.members)
+
+    variables = RequestContext(request, {'form': form, 'reports': reports})
+
+    return render_to_response(
+        'reports/folder.html',
+        variables,
+        )
+
+
+def viewFolders(request):
+    context = {}
+    context['folders_list'] = Folder.objects.all()
+    return render(request, '/reports/folders', context)
+
+
 @login_required
 def see_my_reports(request):
     initial_search = {}
-    my_reports_list = Report.objects.all().filter(owner=request.user)
+    my_reports_list = Report.objects.all().filter(owner=request.user).order_by('keyword')
     for group in UserGroup.objects.filter(members=request.user):
         my_reports_list = my_reports_list | group.report_set.all()
     # Filter based by min date
@@ -176,13 +279,17 @@ def see_my_reports(request):
 
 @login_required
 def delete_report(request, id=None):
-    report = Report.objects.get(id=id)
-    if report.owner != request.user:
+    try:
+        report = Report.objects.get(id=id)
+        if report.owner != request.user:
+            text = "You do not have permission to delete this report"
+            return HttpResponse(text)
+        else:
+            Report.objects.filter(id=id).delete()
+        return render(request, 'reports/deleteReport.html')
+    except:
         text = "You do not have permission to delete this report"
         return HttpResponse(text)
-    else:
-        Report.objects.filter(id=id).delete()
-    return render(request, 'reports/deleteReport.html')
 
 
 @login_required

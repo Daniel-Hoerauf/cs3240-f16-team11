@@ -41,6 +41,9 @@ class UploadedFile(models.Model):
 
 class Folder(models.Model):
     name = models.CharField(max_length=32)
+    members = models.ManyToManyField(Report)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, default='')
+
 
     def __str__(self):
         return self.name
