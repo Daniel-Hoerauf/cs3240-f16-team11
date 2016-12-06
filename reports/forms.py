@@ -11,11 +11,12 @@ class ReportForm(forms.ModelForm):
             choices=[('all', 'Public')] +
                     [(group.name, group.name) for group in
                      UserGroup.objects.filter(members=self.user)]
+
         )
 
     class Meta:
         model = Report
-        fields = ('title', 'short_desc', 'long_desc', 'files')
+        fields = ('title', 'short_desc', 'long_desc', 'files', 'file_encrypted', 'keyword')
 
 class FolderForm(forms.Form):
     title = forms.CharField(required=True)
@@ -38,3 +39,12 @@ class FolderForm(forms.Form):
     #         # because we didn't get a match
     #         pass
     #     return self.cleaned_data
+
+
+
+
+class EditReportForm(forms.ModelForm):
+    title = forms.CharField(required=True,help_text="Name")
+    class Meta:
+        model = Report
+        fields = ('title', 'short_desc', 'long_desc', 'files', 'file_encrypted', 'keyword')

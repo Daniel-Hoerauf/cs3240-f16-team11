@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block title %}
+Edit User Info
+{% endblock %}
+
+{% block content %}
+<div style='text-align: center;'>
+<h1>Edit user information for {{ user.username | title }}</h1>
+</div>
+<hr>
+
+{% if messages %}
+  <div>
+    {% for message in messages %}
+    <div class='alert alert-{% if message.tags == "error" %}danger{% else %}success{% endif %}' role='alert'>
+        {{ message | safe }}
+      </div>
+      {% endfor %}
+  </div>
+  {% endif %}
+
+<h2>Change Password</h2>
+<form method='post' class='form'>
+  {% csrf_token %}
+  <input name='pass' value='True' type='hidden'>
+
+  <label class='control-label' for='curr_pass'>Current Password:</label>
+  <input class='form-control' id='curr_pass' name='current' type='password'>
+
+  <label class='control-label' for='new_pass'>Enter New Password:</label>
+  <input class='form-control' id='new_pass' name='new_pass' type='password'>
+  
+  <label class='control-label' for='new_pass_repeat'>Enter New Password Again:</label>
+  <input class='form-control' id='new_pass_repeat' name='new_pass_repeat' type='password'>
+  <br>
+  {% buttons %}
+    <button type='submit' class='btn btn-primary btn-lg btn-block'>Change Password</button>
+  {% endbuttons %}
+</form>
+
+<hr>
+
+<h2>Change Email Address</h2>
+<h5>(Currently {{ user.email }})</h5>
+<form method='post' class='form'>
+  {% csrf_token %}
+  <input name='email' value='True' type='hidden'>
+
+  <label class='control-label' for='pass'>Enter Password:</label>
+  <input class='form-control' id='pass' name='password' type='password'>
+
+  <label class='control-label' for='new_email'>Enter New Password:</label>
+  <input class='form-control' id='new_email' name='new_email' type='email'>
+  
+  <br>
+  {% buttons %}
+    <button type='submit' class='btn btn-primary btn-lg btn-block'>Change Password</button>
+  {% endbuttons %}
+</form>
+{% endblock %}

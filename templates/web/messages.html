@@ -1,8 +1,23 @@
-<h1>Messages for <a href='/'>{{ user.username }}</a></h1>
+{% extends 'base.html' %}
 
-<ul>
+{% block title %}
+Messages
+{% endblock %}
+
+{% block content %}
+<h1>Messages for {{ user.username | title }}</h1>
+
+<hr>
+
+<ul class='list-group' style='text-align: center;'>
 {% for message in messages %}
-<li {% if not message.read %} style='font-weight: bold' {% endif %} ><a href='/message/view/{{ message.pk }}'>{{ message.subject }} -- {{ message.sender.username }}</a></li>
-
+  <li {% if not message.read %} style='font-weight: bold' {% endif %} class='list-group-item' >
+    <a href='/message/view/{{ message.pk }}'>
+      {{ message.subject }} -- {{ message.sender.username }}
+      <br>
+          {{ message.sent }}
+    </a>
+  </li>
 {% endfor %}
 </ul>
+{% endblock %}

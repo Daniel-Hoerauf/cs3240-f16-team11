@@ -1,14 +1,26 @@
-<h3>Groups for {{ user.username }}</h3>
-<ul>
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block title %}
+Groups
+{% endblock %}
+
+{% block content %}
+<h3>Groups for {{ user.username | title}}</h3>
+<ul class='list-group'>
   {% for group in groups %}
-    <li><a href='/group/?name={{ group|escape }}'>{{ group }}</a></li>
+    <li class='list-group-item'><a href='/group/?name={{ group|escape }}'>{{ group }}</a></li>
   {% endfor %}
 </ul>
+<hr>
 <div>
-  <p>Type in the name of a group you want to create.</p>
-  <form action="/create_group/" method="post" name="create">
+  <form class='form-group' action="/create_group/" method="post" name="create">
     {% csrf_token %}
-    <input type='text' name='groupname'>
-    <input type='submit' value='Submit'>
+    <label class='control-label' for='groupname'>Group to create:</label>
+    <input class='form-control' id='groupname' type='text' name='groupname'>
+    {% buttons %}
+    <button type='submit' class='btn btn-lg btn-primary'>Create Group</button>
+    {% endbuttons %}
   </form>
 </div>
+{% endblock %}

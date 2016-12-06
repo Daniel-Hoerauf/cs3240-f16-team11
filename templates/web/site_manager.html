@@ -1,3 +1,10 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Site Manager
+{% endblock %}
+
+{% block content %}
 <h1>More Site Manager Controls</h1>
 
 {% if messages %}
@@ -33,3 +40,12 @@
     <input type='text' name='username'>
     <input type='submit' value='Submit'>
 </form>
+
+<h3>User Report Access</h3>
+<h4>Access Reports</h4>
+<form action="/SM_get_reports/" method="post" name="SM_get_reports">
+    {% csrf_token %}
+    <input type='text' name='username'>
+    <input type='submit' value='Submit'>
+</form>
+{% endblock %}
