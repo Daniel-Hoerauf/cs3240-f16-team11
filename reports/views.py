@@ -1,20 +1,12 @@
-from django.shortcuts import render, redirect, get_object_or_404, render_to_response
+from django.shortcuts import render, get_object_or_404, render_to_response
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from .models import Report, Folder
-from django.template import loader
+from .models import Report, UploadedFile, Folder
 from .forms import ReportForm, FolderForm
 from django.template import RequestContext
 from web.models import UserGroup
 from django.contrib.auth.models import User
-from django.db.models import Q
-from .forms import ReportForm, EditReportForm
-from django.template import RequestContext
-from web.models import UserGroup
-from django.contrib.auth.models import User
-from Crypto.PublicKey import RSA
 from Crypto import Random
-from base64 import b64encode, b64decode
 from datetime import datetime
 # Create your views here.
 random_generator = Random.new().read
@@ -28,27 +20,16 @@ def thanks(request):
 def folders(request):
     reports = Report.objects.all()
     folders = Folder.objects.all()
-    #print(Folder.objects.get(name="test1").members.all())
     return render(request, 'reports/folders.html', {'folders': folders})
 
 def viewReportsInFolders(request):
     folders = Folder.objects.all()
     reports = Report.objects.all()
 
-    return render(request, 'reports/savedReports.html', {'folders':folders, 'reports':reports})
-
-
+    return render(request, 'reports/savedReports.html',
+                  {'folders': folders, 'reports': reports})
 
 def create_folder(request):
-    # folder_name = request.POST.get('foldername')
-    # owner = request.user
-    # folder = Folder(name=folder_name, owner=owner)
-    # folder.save()
-    # return addReports(request, folder_name)
-    #return redirect('/reports/folders/')
-    #return HttpResponse(status=201)
-
-
     reports = Report.objects.all()
     username_id = request.user
     if request.method == 'POST':
@@ -67,7 +48,7 @@ def create_folder(request):
     else:
         form = FolderForm()
     variables = RequestContext(request, {
-        'form': form, 'reports':reports
+        'form': form, 'reports': reports
     })
 
     return render_to_response(
@@ -83,7 +64,7 @@ def folder(request):
     reports = Report.objects.all()
     print(reports)
     return render(request, 'reports/folder.html', {'folder_name': folder_name,
-                                              'reports': reports})
+                                                   'reports': reports})
 
 
 @login_required
@@ -101,22 +82,15 @@ def add_report(request):
             if form.cleaned_data['Share with:'] != 'all':
                 report.group = UserGroup.objects.get(
                     name=form.cleaned_data['Share with:'])
-            if report.file_encrypted == True:
-                #open file
-                file = report.files
-                file_contents = file.read()
-                print(file_contents)
-                #encrypt contents
-                key = RSA.generate(1024, random_generator)
-                encrypted_data = key.publickey().encrypt(file_contents, 32)
-                encoded_data = b64encode(encrypted_data[0])
-                report.files = encoded_data.decode("utf-8")
-                #download file with private key
-                response = HttpResponse(key.exportKey(), content_type='text/plain')
-                response['Content-Disposition'] = 'attachment; filename=%s.pem' % file.name
-                return response
-
+            files = request.FILES.getlist('file_field')
             report.save()
+            for f in files:
+                file = UploadedFile(report=report, owner=request.user)
+                file.file_obj = f
+                file.save()
+
+
+
 
         # redirect to a new URL:
             return render(request, 'reports/createReport.html', {'form': form_class})
@@ -146,9 +120,14 @@ def edit_report(request, id=None):
                 if form.cleaned_data['Share with:'] != 'all':
                     report.group = UserGroup.objects.get(
                         name=form.cleaned_data['Share with:'])
+                files = request.FILES.getlist('file_field')
                 report.save()
-                text = 'Form has been edited'
-                #return HttpResponse(text)
+                for curr in report.file_set.all():
+                    curr.delete()
+                for f in files:
+                    file = UploadedFile(report=report, owner=request.user)
+                    file.file_obj = f
+                    file.save()
                 return render(request, 'reports/doneEditing.html', {'form': form_class})
 
             else:
@@ -199,6 +178,10 @@ def see_reports(request):
         short_search = reports_list.filter(short_desc__icontains=desc)
         long_search = reports_list.filter(long_desc__icontains=desc)
         reports_list = short_search | long_search
+    for report in reports_list:
+        report.files = report.file_set.all()
+        for file in report.files:
+            file.file_obj.name = file.file_obj.name.split('/')[-1]
     return render(request, 'reports/see_reports.html', {'reports_list':
                                                         reports_list,
                                                         'search_values':
@@ -217,10 +200,8 @@ def add_reports(request, folder_name):
         print(selected)
         if form.is_valid():
             print("hi3")
-            #folder_name=form.cleaned_data.get('title')
-            folder_object = Folder.objects.create(
-            name=folder_name, owner=username_id
-            )
+            folder_object = Folder.objects.create(name=folder_name,
+                                                  owner=username_id)
             folder_object.save()
             for report_selected in selected:
                 re = Report.objects.get(title=report_selected)
@@ -230,15 +211,13 @@ def add_reports(request, folder_name):
 
     else:
         form = FolderForm()
-        folder_object=[]
+        folder_object = []
         if folder_name is not None:
-            folder_object=Folder.objects.get(name=folder_name)
+            folder_object = Folder.objects.get(name=folder_name)
         print(folder_object)
         print(folder_object.members)
 
-    variables = RequestContext(request, {
-    'form': form, 'reports': reports
-    })
+    variables = RequestContext(request, {'form': form, 'reports': reports})
 
     return render_to_response(
         'reports/folder.html',
@@ -291,8 +270,12 @@ def see_my_reports(request):
         short_search = my_reports_list.filter(short_desc__icontains=desc)
         long_search = my_reports_list.filter(long_desc__icontains=desc)
         my_reports_list = short_search | long_search
-
-    return render(request, 'reports/see_my_reports.html', {'my_reports_list':my_reports_list, 'search_values': initial_search})
+    for report in my_reports_list:
+        report.files = report.file_set.all()
+        for file in report.files:
+            file.file_obj.name = file.file_obj.name.split('/')[-1]
+    return render(request, 'reports/see_my_reports.html',
+                  {'my_reports_list': my_reports_list, 'search_values': initial_search})
 
 @login_required
 def delete_report(request, id=None):
@@ -311,12 +294,12 @@ def delete_report(request, id=None):
 
 @login_required
 def download_file(request, pk):
-    report = get_object_or_404(Report, pk=pk)
-    if report.group is not None:
-        if report.group not in UserGroup.objects.filter(members=request.user):
+    file = get_object_or_404(UploadedFile, pk=pk)
+    if file.report.group is not None:
+        if file.report.group not in UserGroup.objects.filter(members=request.user):
             return HttpResponse(status=404)
 
-    filename = report.files.name.split('/')[-1]
-    response = HttpResponse(report.files, content_type='text/plain')
+    filename = file.file_obj.name.split('/')[-1]
+    response = HttpResponse(file.file_obj, content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename=%s' % filename
     return response
