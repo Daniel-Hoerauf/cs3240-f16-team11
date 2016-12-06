@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+    {% for f in folders %}
+        <h3>Folder:</h3><p> {{ f.name }}</p>
+{#        <p>{{ f. }}</p>#}
+            {% for r in f.members.all %}
+            <h3>Reports saved in {{ f.name }}:</h3><p> {{ r}}</p>
+            {% endfor %}
+        {% endfor %}
+
+</br><a href="/home/">Home</a>
+
+        <br>
+    <a href="/logout/">Logout</a>
+</body>
+</html>

@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from reports import views as report_views
 from . import views
 
 urlpatterns = [
@@ -12,6 +13,8 @@ urlpatterns = [
     url(r'^create_group/$', views.create_group, name='create_group'),
     url(r'^group/$', views.group, name='group'),
     url(r'^add_member/$', views.add_member, name='add_member'),
+
+    url(r'^create_folder/$', report_views.create_folder, name='create_folder'),
 
     url(r'^message/post/$', views.message_form, name='message'),
     url(r'^message/view/(?P<pk>\d+)/$', views.message_page, name='view_message'),
