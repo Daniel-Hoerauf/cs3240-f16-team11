@@ -58,30 +58,34 @@ def add_report(request):
 
 @login_required
 def edit_report(request, id=None):
-    if id:
-        report = Report.objects.get(pk=id)
-        if report.owner != request.user:
-            text = "You do not have permission to edit this report"
-            return HttpResponse(text)
-    else:
-        report = Report()
-    form_class = ReportForm(user=request.user, instance=report)
-    if request.method == 'POST':
-        form = ReportForm(request.POST, request.FILES, instance=report, user=request.user)
-        if form.is_valid():
-            report = form.save(commit=False)
-            report.owner = User.objects.get(username=request.user.username)
-            if form.cleaned_data['Share with:'] != 'all':
-                report.group = UserGroup.objects.get(
-                    name=form.cleaned_data['Share with:'])
-            report.save()
-            text = 'Form has been edited'
-            #return HttpResponse(text)
-            return render(request, 'reports/doneEditing.html', {'form': form_class})
-
+    try:
+        if id:
+            report = Report.objects.get(pk=id)
+            if report.owner != request.user:
+                text = "You do not have permission to edit this report"
+                return HttpResponse(text)
         else:
-            text = form.errors
-            return HttpResponse(text)
+            report = Report()
+        form_class = ReportForm(user=request.user, instance=report)
+        if request.method == 'POST':
+            form = ReportForm(request.POST, request.FILES, instance=report, user=request.user)
+            if form.is_valid():
+                report = form.save(commit=False)
+                report.owner = User.objects.get(username=request.user.username)
+                if form.cleaned_data['Share with:'] != 'all':
+                    report.group = UserGroup.objects.get(
+                        name=form.cleaned_data['Share with:'])
+                report.save()
+                text = 'Form has been edited'
+                #return HttpResponse(text)
+                return render(request, 'reports/doneEditing.html', {'form': form_class})
+
+            else:
+                text = form.errors
+                return HttpResponse(text)
+    except:
+        text = "You do not have permission to edit this report"
+        return HttpResponse(text)
 
     return render(request, 'reports/editReport.html', {'form': form_class, 'id': id})
 
@@ -175,13 +179,17 @@ def see_my_reports(request):
 
 @login_required
 def delete_report(request, id=None):
-    report = Report.objects.get(id=id)
-    if report.owner != request.user:
+    try:
+        report = Report.objects.get(id=id)
+        if report.owner != request.user:
+            text = "You do not have permission to delete this report"
+            return HttpResponse(text)
+        else:
+            Report.objects.filter(id=id).delete()
+        return render(request, 'reports/deleteReport.html')
+    except:
         text = "You do not have permission to delete this report"
         return HttpResponse(text)
-    else:
-        Report.objects.filter(id=id).delete()
-    return render(request, 'reports/deleteReport.html')
 
 
 @login_required
