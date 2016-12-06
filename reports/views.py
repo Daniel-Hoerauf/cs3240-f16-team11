@@ -61,7 +61,7 @@ def create_folder(request):
             for report_selected in selected:
                 re = Report.objects.get(title=report_selected)
                 folder_object.members.add(re)
-        return HttpResponse("Folder has been created")
+        return HttpResponse("Folder has been updated")
 
 
     else:
@@ -75,7 +75,38 @@ def create_folder(request):
         variables,
     )
 
+def edit_folder(request, id=None):
+    try:
+        folder=Folder.objects.get(id=id)
+        form_class=FolderForm(user=request.user, instance=folder)
+        if request.method == 'POST':
+            form = FolderForm(request.POST, request.FILES, instance=folder)
+            selected = request.POST.getlist('selected_report[]')
+            if form.is_valid():
+                folder_object = Folder.objects.create(
+                    name=form.cleaned_data['title'], owner=username_id
+                )
+                for report_selected in selected:
+                    re = Report.objects.get(title=report_selected)
+                    folder_object.members.add(re)
+            return render(request, '/reports/doneEditingFolder.html', {'form_class': form_class})
+    except:
+        return HttpResponse("You can't update this folder")
 
+def edit_with_delete(request, id=None):
+    try:
+        folder = Folder.objects.get(id=id)
+        print(folder.owner)
+        if folder.owner != request.user:
+            text = "You do not have permission to change this folder"
+            return HttpResponse(text)
+        else:
+            Folder.objects.filter(id=id).delete()
+            print("deleted")
+        return render(request, 'reports/redirect_to_change.html')
+    except:
+        text = "You are unable to change this folder"
+        return HttpResponse(text)
 
 def folder(request):
     folder_name = request.POST.get('selected')
@@ -85,6 +116,19 @@ def folder(request):
     return render(request, 'reports/folder.html', {'folder_name': folder_name,
                                               'reports': reports})
 
+@login_required
+def delete_folder(request, id=None):
+    try:
+        folder = Folder.objects.get(id=id)
+        if folder.owner != request.user:
+            text = "You do not have permission to delete this folder"
+            return HttpResponse(text)
+        else:
+            Folder.objects.filter(id=id).delete()
+        return render(request, 'reports/deleteFolder.html')
+    except:
+        text = "You are unable to delete this folder"
+        return HttpResponse(text)
 
 @login_required
 def add_report(request):
@@ -155,7 +199,7 @@ def edit_report(request, id=None):
                 text = form.errors
                 return HttpResponse(text)
     except:
-        text = "You do not have permission to edit this report"
+        text = "You are not able to edit this report"
         return HttpResponse(text)
 
     return render(request, 'reports/editReport.html', {'form': form_class, 'id': id})
@@ -298,6 +342,7 @@ def see_my_reports(request):
 def delete_report(request, id=None):
     try:
         report = Report.objects.get(id=id)
+        print(report.owner)
         if report.owner != request.user:
             text = "You do not have permission to delete this report"
             return HttpResponse(text)
@@ -305,8 +350,9 @@ def delete_report(request, id=None):
             Report.objects.filter(id=id).delete()
         return render(request, 'reports/deleteReport.html')
     except:
-        text = "You do not have permission to delete this report"
-        return HttpResponse(text)
+        # text = "You are not able to delete this report"
+        # return HttpResponse(text)
+        return render(request, 'reports/deleteReport.html')
 
 
 @login_required

@@ -1,3 +1,5 @@
+{%  extends 'base.html'    %}
+
 {% block content %}
         <p>Welcome to Create Folder {{ user.username }} !!!</p>
     <form method="post" action="/create_folder/" enctype="multipart/form-data">{% csrf_token %}

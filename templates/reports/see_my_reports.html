@@ -48,11 +48,10 @@ View Reports
                     {% if report.files %}
                     <li><span><a href='/reports/uploads/{{ report.pk }}/'>Download File</a></span></li>
                     {% endif %}
-                    <button type="button" onclick="alert('Report Saved to Your Folder')">Save Report</button>
                     <p></p>
-                    <a href='/reports/edit/{{report.id}}/'>Edit this Report</a>
+                    <a class='btn btn-primary btn-sm btn-default' href='/reports/edit/{{report.id}}/'>Edit this Report</a>
                     <p></p>
-                    <a href='/reports/delete/{{report.id}}/'>Delete this Report</a>
+                    <a class='btn btn-primary btn-sm btn-default' href='/reports/delete/{{report.id}}/'>Delete this Report</a>
 
 
 		    <p></p>
