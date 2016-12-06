@@ -68,10 +68,20 @@
                     <li><span>Public</span></li>
                     {% endif %}
                     <LI><span>Created: </span>{{ report.timestamp }}</LI>
+                    {% if report.files_encrypted %}
+                    <h5>Files are encrypted. Must use FDA to download</h5>
+                    {% else %}
                     {% if report.files %}
-                    <li><span><a href='/reports/uploads/{{ report.pk }}/'>Download File</a></span></li>
+                      {% for file in report.files %}
+                        <li><span>
+                            <a href='/reports/uploads/{{ file.pk }}/'>Download {{ file.file_obj.name }}</a>
+                        </span></li>
+                      {% endfor %}
+                    {% else %}
+                    <li><span>No files attached</span></li>
                     {% endif %}
-                    <button type="button" onclick="alert('Report Saved to Your Folder')">Save Report</button>
+                    {% endif %}
+
 		    <p></p>
             {% endfor %}
             </UL>

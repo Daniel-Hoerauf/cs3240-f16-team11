@@ -61,7 +61,14 @@ def edit_report(request, id=None):
             if form.cleaned_data['Share with:'] != 'all':
                 report.group = UserGroup.objects.get(
                     name=form.cleaned_data['Share with:'])
+            files = request.FILES.getlist('file_field')
             report.save()
+            for curr in report.file_set.all():
+                curr.delete()
+            for f in files:
+                file = UploadedFile(report=report, owner=request.user)
+                file.file_obj = f
+                file.save()
             text = 'Form has been edited'
             return render(request, 'reports/doneEditing.html', {'form': form_class})
 
@@ -160,7 +167,10 @@ def see_my_reports(request):
         short_search = my_reports_list.filter(short_desc__icontains=desc)
         long_search = my_reports_list.filter(long_desc__icontains=desc)
         my_reports_list = short_search | long_search
-
+    for report in my_reports_list:
+        report.files = report.file_set.all()
+        for file in report.files:
+            file.file_obj.name = file.file_obj.name.split('/')[-1]
     return render(request, 'reports/see_my_reports.html',
                   {'my_reports_list': my_reports_list, 'search_values': initial_search})
 
