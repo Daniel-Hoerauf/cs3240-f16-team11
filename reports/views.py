@@ -28,20 +28,6 @@ def add_report(request):
             if form.cleaned_data['Share with:'] != 'all':
                 report.group = UserGroup.objects.get(
                     name=form.cleaned_data['Share with:'])
-            if report.file_encrypted == True:
-                #open file
-                file = report.files
-                file_contents = file.read()
-                print(file_contents)
-                #encrypt contents
-                key = RSA.generate(1024, random_generator)
-                encrypted_data = key.publickey().encrypt(file_contents, 32)
-                encoded_data = b64encode(encrypted_data[0])
-                report.files = encoded_data.decode("utf-8")
-                #download file with private key
-                response = HttpResponse(key.exportKey(), content_type='text/plain')
-                response['Content-Disposition'] = 'attachment; filename=%s.pem' % file.name
-                return response
 
             report.save()
 

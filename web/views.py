@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.messages import error
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User, Group
@@ -377,9 +377,27 @@ def fda_view_report_contents(request):
     if shared_with == None:
         shared_with = 'Public'
     timestamp = str(report_obj.timestamp)
-    files = str(report_obj.files.name.split('/')[-1])
+    files = []
+    files.append(str(report_obj.files.name.split('/')[-1]))
+    files_encrypted = report_obj.file_encrypted
     if files == '':
         files = "None"
     report_info = {'title' : title, 'owner' : owner, 'short_desc' : short_desc, 'long_desc' : long_desc,
-                   'shared_with' : shared_with, 'timestamp' : timestamp, 'files' : files}
+                   'shared_with' : shared_with, 'timestamp' : timestamp, 'files' : files, 'files_encrypted' : files_encrypted}
     return HttpResponse(json.dumps({'report_info': report_info}), content_type='application/json')
+
+
+@require_http_methods(['POST'])
+@csrf_exempt
+def fda_get_files(request):
+    try:
+        report_id = request.POST.get('report_id')
+        report_obj = Report.objects.get(id=report_id)
+        response = HttpResponse(report_obj.files, content_type='application/plain')
+        response['encrypted'] = report_obj.file_encrypted
+        print(response['encrypted'])
+        response['file_name'] = report_obj.files.name.split('/')[-1]
+        return response
+    except Exception as e:
+        print(e)
+        return HttpResponse(status=404)
