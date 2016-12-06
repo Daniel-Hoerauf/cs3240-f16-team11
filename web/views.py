@@ -85,6 +85,10 @@ def group(request):
         if member != request.user:
             members.append(member)
     reports_list = group.report_set.all()
+    for report in reports_list:
+        report.files = report.file_set.all()
+        for file in report.files:
+            file.file_obj.name = file.file_obj.name.split('/')[-1]
     return render(request, 'web/group.html', {'group_name': group_name,
                                               'group_members': members,
                                               'reports_list': reports_list})
