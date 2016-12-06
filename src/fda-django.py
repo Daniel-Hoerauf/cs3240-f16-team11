@@ -109,8 +109,8 @@ def check_download(files, report_id, reports_list, files_encrypted):
             if f == file:
                 check = True
         if check is False:
-            click.echo('No existing report with that name.')
-            check_download(files, report_id, reports_list)
+            click.echo('No existing file with that name.')
+            check_download(files, report_id, reports_list, files_encrypted)
         else:
             download_files(report_id, reports_list, file, files_encrypted)
     else:
@@ -124,10 +124,18 @@ def check_download(files, report_id, reports_list, files_encrypted):
 def encrypt_file():
     key = random_generator(256)
     file_name = click.prompt('Enter the path of the file you wish to encrypt')
-    encrypt(file_name, key)
+    try:
+        encrypt(file_name, key)
+    except FileNotFoundError:
+        click.echo('ERROR: File not found')
+        encrypt_file()
     pk_file_name = file_name + '.pem'
     with open(pk_file_name, 'wb') as f:
         f.write(b64encode(key))
+    click.echo('Encrypted file saved as {}.enc'.format(file_name))
+    click.echo('Keyfile saved as {}'.format(pk_file_name))
+    if click.confirm('Would you like to encrypt another file?'):
+        encrypt_file()
     exit()
 
 def download_files(report_id, reports_list, file_name, files_encrypted):
@@ -139,14 +147,17 @@ def download_files(report_id, reports_list, file_name, files_encrypted):
         if click.confirm("Do you have the private key?"):
             key_file = click.prompt('Enter the path to the RSA key for this file')
             key = None
-            with open(key_file, 'rb') as f:
-                key = b64decode(f.read())
-            out_name = file_name
-            if file_name.split('.')[-1] == 'enc':
-                out_name = file_name[:-4]
-            decrypt_file(file_name, key, out_name)
+            try:
+                with open(key_file, 'rb') as f:
+                    key = b64decode(f.read())
+                out_name = file_name
+                if file_name.split('.')[-1] == 'enc':
+                    out_name = file_name[:-4]
+                    decrypt_file(file_name, key, out_name)
+            except FileNotFoundError:
+                click.echo('ERROR: Keyfile not found')
+                exit()
             click.echo('File saved as {}'.format(out_name))
-            exit()
         else:
             click.echo('You cannot download the file.')
             if click.confirm("Would you like to view another report's contents?"):
