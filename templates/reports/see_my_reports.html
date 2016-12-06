@@ -7,13 +7,9 @@ View Reports
 
 {% block content %}
     <h4><a class='btn btn-primary btn-lg btn-block' href='/reports/'>Add a Report</a></h4>
-    <h4><a class='btn btn-primary btn-lg btn-block' href='/reports/MyReports/'>View Your Reports</a></h4>
+    <h4><a class='btn btn-primary btn-lg btn-block' href='/reports/see/'>View All Available Reports</a></h4>
     <div class='container'>
             <form class='form-horizontal'>
-              <div class='form-group'>
-                <label class='control-label' for='owner'>Owner's name contains: </label>
-                <input class='form-control' type='search' id='owner' name='ownersearch' value='{{ search_values.owner }}'>
-              </div>
               <div class='form-group'>
                 <label class='control-label' for='title'>Title contains: </label>
                 <input type='search' class='form-control' id='title' name='titlesearch' value='{{ search_values.title }}'>
@@ -29,16 +25,18 @@ View Reports
               <div class='form-group'>
                 <label class='control=label' for='before'>Report created before:</label>
                 <input class='form-control' type='datetime-local' id='before' name='beforesearch' value='{{ search_values.before }}'>
-              <br>
+              </div><br>
               {% buttons %}
                 <button type='submit' class='btn-block btn-lg btn btn-primary'>Search</button>
               {% endbuttons %}
             </form>
-    {% if reports_list %}
+        <h1>View Your Reports</h1>
+    {% if my_reports_list %}
             <UL>
-            {% for report in reports_list %}
+            {% for report in my_reports_list %}
                     <LI><b>{{ report.title }}</b></LI>
-                    <LI<span>Owner: </span>{{ report.owner.username }}</LI>
+                    <LI><span>Owner: </span>{{ report.owner.username }}</LI>
+                    <LI><span>Keyword: </span>{{ report.keyword }}</LI>
                     <LI><span>Description: </span>{{ report.short_desc }}</LI>
                     <LI><span>Summary: </span>{{ report.long_desc }}</LI>
                     {% if report.group %}
@@ -60,6 +58,13 @@ View Reports
                     <li><span>No files attached</span></li>
                     {% endif %}
                     {% endif %}
+
+                    <a href='/reports/edit/{{report.id}}/'>Edit this Report</a>
+                    <br>
+                    <a href='/reports/delete/{{report.id}}/'>Delete this Report</a>
+                    <hr>
+
+
 		    <p></p>
             {% endfor %}
             </UL>

@@ -1,3 +1,11 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block title %}
+{{ group_name }}
+{% endblock %}
+
+{% block content %}
 <h1> Members of {{ group_name }} </h1>
 
 {% if messages %}
@@ -10,19 +18,22 @@
     </div>
 {% endif %}
 
-<ul>
+<ul class='list-group'>
   {% for member in group_members %}
-    <li><a href='/user/?name={{ member|escape }}'>{{ member }}</a></li>
+    <li class='list-group-item'><a href='/message/post/?user={{ member|escape }}'>{{ member }}</a></li>
   {% endfor %}
 </ul>
-
+<br>
 <div>
-  <p>Type in the name of a user you want to add to {{ group_name }}.</p>
-  <form action="/add_member/" method="post" name="add">
+  <form class='form-group' action="/add_member/" method="post" name="add">
     {% csrf_token %}
     <input type='hidden' name='groupname' value='{{ group_name }}'>
-    <input type='text' name='username'>
-    <input type='submit' value='Submit'>
+    <label class='control-label' for='add_user'>User to add:</label>
+    <input id='add_user' class='form-control' type='text' name='username'>
+    <br>
+    {% buttons %}
+      <button type='submit' class='btn btn-lg btn-primary'>Add Member</button>
+    {% endbuttons %}
   </form>
 </div>
 
@@ -30,14 +41,19 @@
     {%  load web_filters %}
     {% if user|is_site_manager %}
       <p>Type in the name of a user you want to delete from {{ group_name }}.</p>
-      <form action="/delete_member/" method="post" name="delete">
+      <form class='form-group' action="/delete_member/" method="post" name="delete">
         {% csrf_token %}
         <input type='hidden' name='groupname' value='{{ group_name }}'>
-        <input type='text' name='username'>
-        <input type='submit' value='Submit'>
+        <label class='control-label' for='username'>User to remove:</label>
+        <input id='username' class='form-control' type='text' name='username'>
+        <br>
+        {% buttons %}
+          <button type='submit' class='btn btn-lg btn-primary'>Remove Member</button>
+        {% endbuttons %}
       </form>
     {%  endif %}
 </div>
+<hr>
 <div>
 {% if reports_list %}
             <UL>
@@ -52,10 +68,20 @@
                     <li><span>Public</span></li>
                     {% endif %}
                     <LI><span>Created: </span>{{ report.timestamp }}</LI>
+                    {% if report.files_encrypted %}
+                    <h5>Files are encrypted. Must use FDA to download</h5>
+                    {% else %}
                     {% if report.files %}
-                    <li><span><a href='/reports/uploads/{{ report.pk }}/'>Download File</a></span></li>
+                      {% for file in report.files %}
+                        <li><span>
+                            <a href='/reports/uploads/{{ file.pk }}/'>Download {{ file.file_obj.name }}</a>
+                        </span></li>
+                      {% endfor %}
+                    {% else %}
+                    <li><span>No files attached</span></li>
                     {% endif %}
-                    <button type="button" onclick="alert('Report Saved to Your Folder')">Save Report</button>
+                    {% endif %}
+
 		    <p></p>
             {% endfor %}
             </UL>
@@ -63,3 +89,4 @@
             <P>No reports at present.</P>
     {% endif %}
 </div>
+{% endblock %}
