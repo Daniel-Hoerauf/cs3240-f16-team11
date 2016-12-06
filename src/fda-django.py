@@ -1,9 +1,14 @@
 import djclick as click
 import requests
 import json
-from Crypto.PublicKey import RSA
-from base64 import b64encode, b64decode
+# from Crypto.PublicKey import RSA
+from Crypto.Hash import SHA256
 from Crypto import Random
+from Crypto.Cipher import AES
+from struct import pack, unpack, calcsize
+from os.path import getsize
+from base64 import b64encode, b64decode
+
 
 random_generator = Random.new().read
 
@@ -16,6 +21,8 @@ def login():
     # authenticate user using requests - CHANGE URL TO HEROKU AFTER DEVELOPMENT
     r = requests.post('http://127.0.0.1:8000/fda_login/', data={'username': username, 'password': password})
     if(r.status_code == requests.codes.ok):
+        if click.confirm('Would you like to encrypt a file?'):
+            encrypt_file()
         view_files(username)
     else:
         click.echo('Invalid username and password')
@@ -86,34 +93,13 @@ def view_report_contents(reports_list):
                     click.echo('Goodbye then.')
                     exit()
             else:
-                if report_info['files_encrypted']:
-                    pass
-                    # check_encryption(report_info['files'], report_id, reports_list)
-                else:
-                    check_download(report_info['files'], report_id,
-                                   reports_list, False)
+                check_download(report_info['files'], report_id,
+                               reports_list, report_info['files_encrypted'])
         elif r.status_code == 404:
             click.echo('You do not currently have any reports. Goodbye.')
         else:
             click.echo('Error. Please contact site manager.')
             exit()
-
-
-def check_encryption(files, report_id, reports_list):
-    if click.confirm('Would you like to encrypt a file?'):
-        file = click.prompt('Which file would you like to encrypt?')
-        check = False
-        for f in files:
-            if f == file:
-                check = True
-        if check is False:
-            click.echo('No existing file with that name.')
-            check_encryption(files, report_id, reports_list)
-        else:
-            encrypt_file(files, report_id, reports_list)
-    else:
-        check_download(files, report_id, reports_list)
-
 
 def check_download(files, report_id, reports_list, files_encrypted):
     if click.confirm("Would you like to download a file from this report?"):
@@ -135,34 +121,14 @@ def check_download(files, report_id, reports_list, files_encrypted):
             exit()
 
 
-def encrypt_file(files, report_id, reports_list):
-    # get report files - CHANGE URL TO HEROKU AFTER DEVELOPMENT
-    r1 = requests.post('http://127.0.0.1:8000/fda_get_files/', {'report_id': report_id})
-    file_name = r1.headers['file_name']
-    # open file
-    file_contents = r1.content
-    # encrypt contents
-    key = RSA.generate(1024, random_generator)
-    encrypted_data = key.publickey().encrypt(file_contents, 32)
-    encoded_data = b64encode(encrypted_data[0])
-    decoded_data = encoded_data.decode("utf-8")
-    new_file_name = file_name + '.enc'
-    new_file = open(new_file_name, 'w')
-    new_file.write(decoded_data)
-    new_file.close()
-    # download file with private key
-    pk_file_name = file_name.split('.')[0] + '.pem'
-    pk_file = open(pk_file_name, 'wb')
-    pk_file.write(key.exportKey())
-    pk_file.close()
-    click.echo('Success. File is now encrypted and downloaded.')
-    click.echo('Please make sure to re-upload this encrypted file to your report.')
-
-    if click.confirm("Do you want to encrypt another file?"):
-        view_report_contents(reports_list)
-    else:
-        check_download(files, report_id, reports_list)
-
+def encrypt_file():
+    key = random_generator(256)
+    file_name = click.prompt('Enter the path of the file you wish to encrypt')
+    encrypt(file_name, key)
+    pk_file_name = file_name + '.pem'
+    with open(pk_file_name, 'wb') as f:
+        f.write(b64encode(key))
+    exit()
 
 def download_files(report_id, reports_list, file_name, files_encrypted):
     # get report files - CHANGE URL TO HEROKU AFTER DEVELOPMENT
@@ -171,15 +137,16 @@ def download_files(report_id, reports_list, file_name, files_encrypted):
                        'file_name': file_name})
     if files_encrypted:
         if click.confirm("Do you have the private key?"):
-            key_file = click.prompt('Please enter the name of the file that includes the private key')
-            key_str = open(key_file, 'rb').read()
-            key = RSA.importKey(key_str.rstrip())
-            decrypted_data = key.decrypt(b64decode(r.content))
-            file_name = r.headers['file_name'].replace('.enc', '')
-            file = open(file_name, 'wb')
-            file.write(decrypted_data)
-            file.close()
-            click.echo('Success. Your file has been decrypted and downloaded.')
+            key_file = click.prompt('Enter the path to the RSA key for this file')
+            key = None
+            with open(key_file, 'rb') as f:
+                key = b64decode(f.read())
+            out_name = file_name
+            if file_name.split('.')[-1] == 'enc':
+                out_name = file_name[:-4]
+            decrypt_file(file_name, key, out_name)
+            click.echo('File saved as {}'.format(out_name))
+            exit()
         else:
             click.echo('You cannot download the file.')
             if click.confirm("Would you like to view another report's contents?"):
@@ -198,6 +165,46 @@ def download_files(report_id, reports_list, file_name, files_encrypted):
     else:
         click.echo('Goodbye then.')
         exit()
+
+
+def encrypt(file_name, sym_key):
+    '''Uses the supplied key and AES encryption to encrypt a file'''
+    key = SHA256.new(sym_key).digest()
+    out_file_name = '{}.enc'.format(file_name)
+    iv = Random.new().read(AES.block_size)
+    filesize = getsize(file_name)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    with open(file_name, 'rb') as read_file:
+        with open(out_file_name, 'wb') as out_file:
+            out_file.write(pack('<Q', filesize))
+            out_file.write(iv)
+            while True:
+                chunk = read_file.read(2048)
+                if len(chunk) == 0:
+                    break
+                elif len(chunk) % 16 != 0:
+                    chunk += b'\x00' * (16 - (len(chunk) % 16))
+
+                out_file.write(cipher.encrypt(chunk))
+    return True
+
+
+def decrypt_file(file_name, sym_key, out_file_name):
+    '''Decrypt the AES encrypted file'''
+    key = SHA256.new(sym_key).digest()
+    with open(file_name, 'rb') as read_file:
+        # Gets the first `long` from the file
+        size = unpack('<Q', read_file.read(calcsize('Q')))[0]
+        iv = read_file.read(16)
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        with open(out_file_name, 'wb') as out_file:
+            while True:
+                chunk = read_file.read(2048)
+                if len(chunk) == 0:
+                    break
+                out_file.write(cipher.decrypt(chunk))
+            out_file.truncate(size)
+        return True
 
 
 if __name__ == '__main__':
