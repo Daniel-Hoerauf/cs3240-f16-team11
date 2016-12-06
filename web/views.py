@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.conf import settings
 from django.http import HttpResponse
 from django.contrib.messages import error
 from django.contrib.auth import login, authenticate
@@ -17,6 +18,7 @@ from base64 import b64encode, b64decode
 from django.views.decorators.csrf import csrf_exempt
 from reports.models import Report
 import json
+import os
 
 
 random_generator = Random.new().read
@@ -452,3 +454,8 @@ def edit_info(request):
             return redirect('manage_account')
     else:
         return HttpResponse(status=404)
+
+def serve_fda(request):
+    from django.views.static import serve
+    filepath = os.path.join(settings.STATIC_ROOT, 'fda-django.py')
+    return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
