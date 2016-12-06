@@ -22,7 +22,6 @@ urlpatterns = [
 
     url(r'^users/$', views.find_users, name='all_users'),
     url(r'^user/(?P<user>.+)/$', views.view_user, name='user'),
-    url(r'^saved/$', views.saved_reports, name='saved_folder'),
 
     url(r'^site_manager/$', views.site_manager, name='site_manager'),
     url(r'^give_SM_status/$', views.give_SM_status, name='give_SM_status'),
