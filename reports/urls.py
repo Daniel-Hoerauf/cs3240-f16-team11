@@ -16,5 +16,6 @@ urlpatterns = [
     url(r'^uploads/(?P<pk>\d+)/', views.download_file, name='download'),
     url(r'^edit/(?P<id>\d+)/$', views.edit_report, {}, name='report_edit'),
     url(r'^delete/(?P<id>\d+)/$', views.delete_report, {}, name='report_delete'),
-
+    url(r'^deleteFolder/(?P<id>\d+)/$', views.delete_folder, {}, name='folder_delete'),
+    url(r'^editFolder/(?P<id>\d+)/$', views.edit_with_delete, {}, name='folder_edit'),
 ]

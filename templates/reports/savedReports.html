@@ -1,21 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-</head>
-<body>
+{%  extends 'base.html'    %}
 
+{%  block content %}
     {% for f in folders %}
-        <h3>Folder:</h3><p> {{ f.name }}</p>
-{#        <p>{{ f. }}</p>#}
+        <h1>Folder:</h1><p> {{ f.name }}</p>
+        <a href="/reports/deleteFolder/{{f.id}}/">Delete this folder</a>
+        <p></p>
+        <a href="/reports/editFolder/{{f.id}}/">Edit this folder</a>
+            <h4>Reports saved in {{ f.name }}:</h4>
             {% for r in f.members.all %}
-            <h3>Reports saved in {{ f.name }}:</h3><p> {{ r}}</p>
+            <p> {{ r}}</p>
             {% endfor %}
         {% endfor %}
 
-</br><a href="/home/">Home</a>
-
-        <br>
-    <a href="/logout/">Logout</a>
-</body>
-</html>
+{%  endblock %}

@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-</head>
-<body>
+{%  extends 'base.html'    %}
+
+{%  block content %}
 <h1>{{ folder_name }}</h1>
 {% for report in reports %}
         <form  action="/reports/folders/" method="post"> {% csrf_token %}
@@ -13,5 +10,4 @@
     <input type="hidden" name="folderName" value="{{ folder_name }}"/>
     </form>
 
-</body>
-</html>
+{%   endblock %}
