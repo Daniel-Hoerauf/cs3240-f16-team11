@@ -381,12 +381,42 @@ def fda_view_report_contents(request):
     if shared_with is None:
         shared_with = 'Public'
     timestamp = str(report_obj.timestamp)
-    files = str(report_obj.files.name.split('/')[-1])
-    if files == '':
-        files = "None"
+    files_encrypted = report_obj.files_encrypted
+    files = report_obj.file_set.all()
+    if files:
+        files = [file.file_obj.name.split('/')[-1] for file in files]
+    else:
+        files = 'None'
     report_info = {'title': title, 'owner': owner, 'short_desc': short_desc, 'long_desc': long_desc,
-                   'shared_with': shared_with, 'timestamp': timestamp, 'files': files}
+                   'shared_with': shared_with, 'timestamp': timestamp, 'files': files, 'files_encrypted': files_encrypted}
     return HttpResponse(json.dumps({'report_info': report_info}), content_type='application/json')
+
+
+@require_http_methods(['POST'])
+@csrf_exempt
+def fda_get_files(request):
+    try:
+        report_id = request.POST.get('report_id')
+        file_name = request.POST.get('file_name')
+        report_obj = Report.objects.get(id=report_id)
+        files = report_obj.file_set.all()
+        print(files)
+        file = None
+        for f in files:
+            if f.file_obj.name.split('/')[-1] == file_name:
+                file = f.file_obj
+                print(file)
+                break
+        if file is None:
+            return HttpResponse(status=404)
+        response = HttpResponse(file, content_type='application/plain')
+        return response
+    except Exception as e:
+        print(e)
+        return HttpResponse(status=404)
+    # report_info = {'title': title, 'owner': owner, 'short_desc': short_desc, 'long_desc': long_desc,
+    #                'shared_with': shared_with, 'timestamp': timestamp, 'files': files}
+    # return HttpResponse(json.dumps({'report_info': report_info}), content_type='application/json')
 
 
 @login_required

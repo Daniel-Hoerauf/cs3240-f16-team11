@@ -35,4 +35,5 @@ urlpatterns = [
     url(r'^fda_login/$', views.fda_login, name='fda_login'),
     url(r'^fda_view_all_files/$', views.fda_view_all_files, name='fda_view_all_files'),
     url(r'^fda_view_report_contents/$', views.fda_view_report_contents, name='fda_view_report_contents'),
+    url(r'^fda_get_files/$', views.fda_get_files, name='fda_get_files'),
 ]
