@@ -161,11 +161,11 @@ def message_page(request, pk):
         elif request.POST.get('delete', False):
             message.delete()
             return redirect('/messages/')
-        elif request.POST.get('key', False):
-            key = RSA.importKey(request.POST['key'].strip())
-            message.message = key.decrypt(b64decode(message.message))
-            message.encrypted = False
-            return render(request, 'web/view_message.html', {'message': message})
+        # elif request.POST.get('key', False):
+        #     key = RSA.importKey(request.POST['key'].strip())
+        #     message.message = key.decrypt(b64decode(message.message))
+        #     message.encrypted = False
+        #     return render(request, 'web/view_message.html', {'message': message})
         else:
             return HttpResponse(status=400)
     message.read = True
