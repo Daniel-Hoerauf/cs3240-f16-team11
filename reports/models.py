@@ -32,7 +32,8 @@ class Report(models.Model):
 
 class UploadedFile(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    report = models.ForeignKey(Report, on_delete=models.CASCADE)
+    report = models.ForeignKey(Report, on_delete=models.CASCADE,
+                               related_name='file_set')
     file_obj = models.FileField(upload_to=get_file_dest)
 
     def __str__(self):

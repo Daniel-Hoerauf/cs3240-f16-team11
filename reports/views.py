@@ -112,6 +112,10 @@ def see_reports(request):
         short_search = reports_list.filter(short_desc__icontains=desc)
         long_search = reports_list.filter(long_desc__icontains=desc)
         reports_list = short_search | long_search
+    for report in reports_list:
+        report.files = report.file_set.all()
+        for file in report.files:
+            file.file_obj.name = file.file_obj.name.split('/')[-1]
     return render(request, 'reports/see_reports.html', {'reports_list':
                                                         reports_list,
                                                         'search_values':
@@ -173,12 +177,12 @@ def delete_report(request, id=None):
 
 @login_required
 def download_file(request, pk):
-    report = get_object_or_404(Report, pk=pk)
-    if report.group is not None:
-        if report.group not in UserGroup.objects.filter(members=request.user):
+    file = get_object_or_404(UploadedFile, pk=pk)
+    if file.report.group is not None:
+        if file.report.group not in UserGroup.objects.filter(members=request.user):
             return HttpResponse(status=404)
 
-    filename = report.files.name.split('/')[-1]
-    response = HttpResponse(report.files, content_type='text/plain')
+    filename = file.file_obj.name.split('/')[-1]
+    response = HttpResponse(file.file_obj, content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename=%s' % filename
     return response

@@ -48,10 +48,14 @@ View Reports
                     {% endif %}
                     <LI><span>Created: </span>{{ report.timestamp }}</LI>
                     {% if report.files %}
-                    <li><span><a href='/reports/uploads/{{ report.pk }}/'>Download File</a></span></li>
+                      {% for file in report.files %}
+                        <li><span>
+                            <a href='/reports/uploads/{{ file.pk }}/'>Download {{ file.file_obj.name }}</a>
+                        </span></li>
+                      {% endfor %}
+                    {% else %}
+                    <li><span>No files attached</span></li>
                     {% endif %}
-                    <button type="button" onclick="alert('Report Saved to Your Folder')">Save Report</button>
-
 		    <p></p>
             {% endfor %}
             </UL>
