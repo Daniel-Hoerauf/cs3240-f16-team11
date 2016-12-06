@@ -1,3 +1,10 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Site Manager
+{% endblock %}
+
+{% block content %}
 <h1>More Site Manager Controls</h1>
 
 {% if messages %}
@@ -11,7 +18,7 @@
 {% endif %}
 
 <h3>Site Manager Status Control</h3>
-<p>Type in the name of the user you want to give Site Manager status.</p>
+<p>Enter the name of the user you want to give Site Manager status.</p>
 <form action="/give_SM_status/" method="post" name="choose_user">
     {% csrf_token %}
     <input type='text' name='username'>
@@ -19,7 +26,7 @@
 </form>
 
 <h3>User Account Access Control</h3>
-<p>Type in the name of the user whose account will be suspended or restored.</p>
+<p>Enter the name of the user whose account will be suspended or restored.</p>
 <h4>Suspend User Control:</h4>
 <form action="/suspend_account/" method="post" name="suspend_account">
     {% csrf_token %}
@@ -33,3 +40,13 @@
     <input type='text' name='username'>
     <input type='submit' value='Submit'>
 </form>
+
+<h3>User Report Access</h3>
+<h4>Access Reports</h4>
+<p>Enter the name of the user whose reports you want to access.</p>
+<form action="/SM_get_reports/" method="post" name="SM_get_reports">
+    {% csrf_token %}
+    <input type='text' name='username'>
+    <input type='submit' value='Submit'>
+</form>
+{% endblock %}

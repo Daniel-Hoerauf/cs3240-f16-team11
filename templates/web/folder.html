@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<h1> Reports in {{ folder_name }} </h1>
+
+<ul>
+  {% for member in group_members %}
+    <li><a href='/user/?name={{ member|escape }}'>{{ member }}</a></li>
+  {% endfor %}
+</ul>
+
+</body>
+</html>

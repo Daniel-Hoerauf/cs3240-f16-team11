@@ -1,6 +1,10 @@
-{% load bootstrap3 %}
-{% bootstrap_css %}
-{% bootstrap_javascript %}
+{% extends 'base.html' %}
+
+{% block title %}
+View Message
+{% endblock %}
+
+{% block content %}
 <h1>{{ message.subject }}</h1>
 
 <h3>From: {{ message.sender.username }}</h3>
@@ -21,14 +25,16 @@
 <p>{{ message.message }}</p>
 {% endif %}
 
+<br>
 <form method='post' class='form'>
   {% csrf_token %}
   <input name='read' value='True' type='hidden'>
   <button type='submit' class='btn btn-primary'>Mark as unread</button>
 </form>
-
+<br>
 <form method='post' class='form'>
   {% csrf_token %}
   <input name='delete' value='True' type='hidden'>
   <button type='submit' class='btn btn-primary'>Delete Message</button>
 </form>
+{% endblock %}

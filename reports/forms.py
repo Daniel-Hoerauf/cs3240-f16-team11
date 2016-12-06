@@ -1,8 +1,12 @@
 from django import forms
-from .models import Report
+from .models import Report, Folder
 from web.models import UserGroup
 
+
 class ReportForm(forms.ModelForm):
+    file_field = forms.FileField(required=False,
+                                 widget=forms.ClearableFileInput(attrs={'multiple': True}))
+
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
@@ -11,8 +15,42 @@ class ReportForm(forms.ModelForm):
             choices=[('all', 'Public')] +
                     [(group.name, group.name) for group in
                      UserGroup.objects.filter(members=self.user)]
+
         )
 
     class Meta:
         model = Report
-        fields = ('title', 'short_desc', 'long_desc', 'files')
+        fields = ('title', 'short_desc', 'long_desc',
+                  'keyword', 'files_encrypted')
+
+class FolderForm(forms.Form):
+    title = forms.CharField(required=True)
+
+    # def clean(self):
+    #     folder_name = self.cleaned_data.get('title', None)
+    #     if Folder.objects.filter(name=folder_name):
+    #         #raise forms.ValidationError("A folder with this name already exists")
+    #
+    #         return self.cleaned_data
+    #     else:
+    #         raise forms.ValidationError("A folder with this name already exists")
+
+    # def clean(self):
+    #     try:
+    #         Folder.objects.filter(name=self.cleaned_data.get('title'))
+    #         # if we get this far, we have an exact match for this form's data
+    #         raise forms.ValidationError("Exists already!")
+    #     except Folder.DoesNotExist:
+    #         # because we didn't get a match
+    #         pass
+    #     return self.cleaned_data
+
+
+
+
+class EditReportForm(forms.ModelForm):
+    title = forms.CharField(required=True, help_text="Name")
+
+    class Meta:
+        model = Report
+        fields = ('title', 'short_desc', 'long_desc', 'files_encrypted', 'keyword')

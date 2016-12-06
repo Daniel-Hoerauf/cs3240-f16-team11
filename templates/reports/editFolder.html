@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block title %}
+Edit Folder
+{% endblock %}
+
+{% block content %}
+    <h1>Edit Your Folder</h1>
+    <form action="{% url 'folder_edit' id %}" method='post' enctype="multipart/form-data">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        <button type="submit" class="save btn btn-default">Save</button>
+    </form>
+{% endblock %}

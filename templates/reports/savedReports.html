@@ -1,0 +1,15 @@
+{%  extends 'base.html'    %}
+
+{%  block content %}
+    {% for f in folders %}
+        <h1>Folder:</h1><p> {{ f.name }}</p>
+        <a href="/reports/deleteFolder/{{f.id}}/">Delete this folder</a>
+        <p></p>
+        <a href="/reports/editFolder/{{f.id}}/">Edit this folder</a>
+            <h4>Reports saved in {{ f.name }}:</h4>
+            {% for r in f.members.all %}
+            <p> {{ r}}</p>
+            {% endfor %}
+        {% endfor %}
+
+{%  endblock %}

@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Report
+from .models import Report, UploadedFile, Folder
 
-# Register your models here.
 admin.site.register(Report)
+admin.site.register(UploadedFile)
+admin.site.register(Folder)

@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from reports import views as report_views
 from . import views
 
 urlpatterns = [
@@ -6,11 +7,14 @@ urlpatterns = [
     url(r'^register/$', views.register_page, name='register_page'),
     url(r'^create_account/$', views.create_account, name='create_account'),
     url(r'^home/$', views.home, name='home'),
+    url(r'^info/edit/$', views.edit_info, name='manage_account'),
 
     url(r'^groups/$', views.groups, name='groups'),
     url(r'^create_group/$', views.create_group, name='create_group'),
     url(r'^group/$', views.group, name='group'),
     url(r'^add_member/$', views.add_member, name='add_member'),
+
+    url(r'^create_folder/$', report_views.create_folder, name='create_folder'),
 
     url(r'^message/post/$', views.message_form, name='message'),
     url(r'^message/view/(?P<pk>\d+)/$', views.message_page, name='view_message'),
@@ -24,5 +28,14 @@ urlpatterns = [
     url(r'^give_SM_status/$', views.give_SM_status, name='give_SM_status'),
     url(r'^delete_member/$', views.delete_member, name='delete_member'),
     url(r'^suspend_account/$', views.suspend_account, name='suspend_account'),
-    url(r'^restore_account/$', views.restore_account, name='restore_account')
+    url(r'^restore_account/$', views.restore_account, name='restore_account'),
+    url(r'^SM_get_reports/$', views.SM_get_reports, name='SM_get_reports'),
+    url(r'^SM_delete_reports/$', views.SM_delete_reports, name='SM_delete_reports'),
+
+    url(r'^fda_login/$', views.fda_login, name='fda_login'),
+    url(r'^fda_view_all_files/$', views.fda_view_all_files, name='fda_view_all_files'),
+    url(r'^fda_view_report_contents/$', views.fda_view_report_contents, name='fda_view_report_contents'),
+    url(r'^fda_get_files/$', views.fda_get_files, name='fda_get_files'),
+
+    url(r'^fda/$', views.serve_fda),
 ]

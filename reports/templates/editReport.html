@@ -1,12 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Create a Report</title>
+    <title>Edit a Report</title>
 </head>
 <body>
-    <h1>Add A New Report</h1>
-    <form action='/reports/' method='post'>
+    <h1>Edit A Report</h1>
+    <form action="{% url 'report_edit' id %}" method='post' enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
         <!--<input type='submit' value='Submit' />-->

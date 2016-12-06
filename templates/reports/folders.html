@@ -1,0 +1,31 @@
+
+{%  extends 'base.html'    %}
+
+{%  block title %}
+<h3>Folders for {{ user.username }}</h3>
+{%  endblock %}
+    {% block content %}
+         <div>
+  <p>Type in the name of a folder you want to create.</p>
+  <form action="/reports/create_folder/" method="post" name="create">
+    {% csrf_token %}
+    <input type='text' name='foldername'>
+    <input type='submit' value='Submit'>
+  </form>
+</div>
+        {% for folder in folders %}
+          <li><a href="/reports/add_reports/{{folder}}">{{ folder }}</a></li>  <br>
+        {% endfor %}
+
+
+         {% for report in reports %}
+             <input type="checkbox" name="selected_report[]" value="{{ report.title }}"/> {{ report.title }}
+
+                    {% endfor %}
+
+    </form>
+
+    <a href="/logout/">Logout</a>
+
+{% endblock %}
+

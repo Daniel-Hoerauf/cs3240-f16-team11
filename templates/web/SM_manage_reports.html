@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Manage Reports
+{% endblock %}
+
+
+{% block content %}
+    <div>
+        {% if reports_list %}
+            {% for report in reports_list %}
+                <form action="{% url 'SM_delete_reports' %}" method="post" name="user_reports">
+                  {% csrf_token %}
+                  <input type="checkbox" name="reports[]" id="{{ report.id }}" value="{{ report.title }}"> {{ report.title }}
+                  <input type="hidden" name="selected_user" value="{{ selected_user }}">
+                  <input type="submit" value="Delete">
+                </form>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endblock %}

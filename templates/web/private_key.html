@@ -1,5 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Message Private Key
+{% endblock %}
+
+{% block content %}
+<div style='text-align: center;'>
 <h1>Message Sent!</h1>
 
 <p>Copy the following key and send it to the recipient.<br> <strong>They will not be able to decrypt your message without it!</strong></p>
 
 <pre>{{ key }}</pre>
+</div>
+{% endblock %}
